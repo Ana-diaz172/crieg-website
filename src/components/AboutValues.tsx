@@ -1,54 +1,166 @@
-import { GraduationCap, Eye, HeartHandshake, Users } from "lucide-react";
+"use client";
 
-export default function AboutValues() {
-  const cards = [
-    {
-      title: "Misión",
-      Icon: GraduationCap,
-      text: "Impulsar la educación médica continua en radiología e imagen, desde la residencia hasta la práctica profesional, mediante sesiones académicas, conferencias y congresos.",
-    },
-    {
-      title: "Visión",
-      Icon: Eye,
-      text: "Ser la comunidad de referencia en el Bajío por su excelencia académica, innovación y colaboración interinstitucional, contribuyendo a una atención segura y de alto impacto para la sociedad.",
-    },
-    {
-      title: "Valores",
-      Icon: HeartHandshake,
-      text: "Educación continua, ética y calidad, trabajo colaborativo y servicio a la comunidad médica. Promovemos el intercambio de conocimiento y el desarrollo profesional permanente.",
-    },
-  ];
+import { Plus, Minus, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
+type AccordionKey = "education" | "collaboration" | "research" | null;
+
+export default function AboutHeroSection() {
+  // Mantiene por defecto abierto "education" como en tu diseño original
+  const [expanded, setExpanded] = useState<AccordionKey>("education");
+
+  const toggleItem = (key: Exclude<AccordionKey, null>) => {
+    setExpanded((prev) => (prev === key ? null : key));
+  };
 
   return (
-    <div className="w-full my-16 px-8 bg-[#EDECE4] rounded-3xl py-24">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col items-center">
-          <Users className="size-6" />
-          <h2 className="text-3xl font-bold mb-4 text-center">
-            Acerca de Nosotros
-          </h2>
-        </div>
-        <p className="text-base text-center text-gray-600 max-w-2xl mx-auto">
-          Somos una organización dedicada a la educación médica continua en
-          radiología e imagen. Promovemos que los médicos se mantengan
-          actualizados y cuenten con espacios de desarrollo profesional.
-        </p>
+    <div className="w-full bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center min-h-screen py-12 lg:py-0">
+          {/* Left Content */}
+          <div className="space-y-8 lg:space-y-12">
+            <div className="space-y-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light leading-tight text-gray-900">
+                Impulsando la
+                <br />
+                excelencia médica
+              </h1>
 
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.map(({ title, Icon, text }) => (
-            <div
-              key={title}
-              className="bg-white/80 backdrop-blur shadow-sm hover:shadow-md transition rounded p-6 pb-14"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full ">
-                  <Icon className="h-5 w-5 text-gray-700" aria-hidden="true" />
-                </span>
-                <h3 className="text-2xl font-semibold">{title}</h3>
+              <div className="space-y-4 text-gray-700">
+                <p className="text-lg leading-relaxed">
+                  Somos el Colegio de Radiología e Imagen
+                  <br />
+                  del Estado de Guanajuato, dedicados a
+                  <br />
+                  la educación médica continua especializada.
+                </p>
+
+                <p className="text-lg leading-relaxed">
+                  Ofreciendo eventos organizados, transparentes
+                  <br />
+                  y con valor ante el Consejo Mexicano de
+                  <br />
+                  Radiología e Imagen, damos más espacio para...
+                </p>
               </div>
-              <p className="text-gray-700 leading-relaxed px-2">{text}</p>
             </div>
-          ))}
+
+            {/* Expandable Items */}
+            <div className="space-y-4">
+              {/* Item 1 */}
+              <div className="border-b border-gray-200 pb-4">
+                <button
+                  onClick={() => toggleItem("education")}
+                  className="flex items-center justify-between w-full text-left cursor-pointer"
+                >
+                  <span className="text-lg text-gray-900">
+                    Desarrollo profesional y la certificación continua
+                  </span>
+                  {expanded === "education" ? (
+                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  ) : (
+                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  )}
+                </button>
+
+                {expanded === "education" && (
+                  <div className="mt-4 text-gray-700 leading-relaxed">
+                    <p>
+                      Ofrecemos eventos de educación médica continua
+                      <br />
+                      organizados y con valor ante el Consejo Mexicano
+                      <br />
+                      de Radiología e Imagen, promoviendo la certificación
+                      <br />y el mayor puntaje anual de recertificación.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Item 2 */}
+              <div className="border-b border-gray-200 pb-4">
+                <button
+                  onClick={() => toggleItem("collaboration")}
+                  className="flex items-center justify-between w-full text-left cursor-pointer"
+                >
+                  <span className="text-lg text-gray-600">
+                    Colaboración interinstitucional y el trabajo en equipo
+                  </span>
+                  {expanded === "collaboration" ? (
+                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  ) : (
+                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  )}
+                </button>
+
+                {expanded === "collaboration" && (
+                  <div className="mt-4 text-gray-700 leading-relaxed">
+                    <p>
+                      Fomentamos la relación con otras organizaciones médicas
+                      <br />
+                      estatales, nacionales e internacionales, creando
+                      <br />
+                      una red sólida de conocimiento e innovación médica.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Item 3 */}
+              <div className="border-b border-gray-200 pb-4">
+                <button
+                  onClick={() => toggleItem("research")}
+                  className="flex items-center justify-between w-full text-left cursor-pointer"
+                >
+                  <span className="text-lg text-gray-600">
+                    Investigación y formación de nuevas generaciones
+                  </span>
+                  {expanded === "research" ? (
+                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  ) : (
+                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                  )}
+                </button>
+
+                {expanded === "research" && (
+                  <div className="mt-4 text-gray-700 leading-relaxed">
+                    <p>
+                      Estimulamos la investigación médica y involucramos
+                      <br />
+                      activamente a los médicos residentes en actividades
+                      <br />
+                      académicas especializadas en radiología e imagen.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Ver más button */}
+            <Link
+              className="bg-[#0B4B2B] text-white w-fit border border-[#07572f] px-6 py-3 rounded-full flex gap-1 cursor-pointer items-center text-base font-medium hover:bg-[#0D5C36] transition"
+              href="about"
+            >
+              Ver más
+              <ArrowUpRight className="text-white" />
+            </Link>
+          </div>
+
+          {/* Right Image */}
+          <div className="relative lg:h-screen flex items-center justify-center">
+            <div className="relative w-full max-w-lg lg:max-w-none">
+              <div className="aspect-[4/5] lg:aspect-[3/4] xl:aspect-[4/5] overflow-hidden">
+                <img
+                  src="about-banner.webp"
+                  alt="Médicos especializados en radiología trabajando en equipo"
+                  className="w-full h-full object-cover"
+                />
+                {/* Gradient overlay profesional */}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-gray-900/20 mix-blend-overlay"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
