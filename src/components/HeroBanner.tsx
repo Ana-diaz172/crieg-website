@@ -5,7 +5,7 @@ import { ArrowUpRight, Star } from "lucide-react";
 
 export default function HeroBanner() {
   return (
-    <section className="relative w-full h-[100vh] sm:h-[100vh] lg:h-[100vh] overflow-hidden">
+    <section className="relative w-full h-[100vh] sm:h-[100vh] lg:h-full lg:min-h-[820px] overflow-hidden">
       {/* Background image */}
       <Image
         fill
@@ -22,10 +22,10 @@ export default function HeroBanner() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
 
       {/* Content */}
-      <div className="absolute left-0 bottom-20 sm:bottom-24 lg:bottom-5 w-full flex justify-center items-center">
+      <div className="absolute left-0 bottom-20 sm:bottom-24 lg:bottom-20 w-full flex justify-center items-center">
         <div className="w-full max-w-7xl px-6 sm:px-8">
           <div className="w-full max-w-3xl text-white">
-            <h1 className="font-light text-3xl sm:text-5xl lg:text-6xl leading-tight text-shadow-md mb-2">
+            <h1 className="font-light text-5xl sm:text-5xl lg:text-6xl leading-tight text-shadow-md mb-2">
               Colegio de Radiología e Imagen del estado de Guanajuato.
             </h1>
 
