@@ -15,7 +15,7 @@ export default function ContactPage() {
         <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">
           {/* Header */}
           <div className="mb-16">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-gray-900 mb-6">
+            <h1 className="mt-20 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-gray-900 mb-6">
               Mantente en
               <br />
               contacto con CRIEG
@@ -49,10 +49,10 @@ export default function ContactPage() {
                 Email
               </h3>
               <a
-                href="mailto:info@crig-guanajuato.org"
+                href="mailto:contacto@crieg.com.mx"
                 className="text-gray-900 hover:text-green-600 transition-colors"
               >
-                info@crig-guanajuato.org
+                contacto@crieg.com.mx
               </a>
             </div>
 
@@ -73,6 +73,7 @@ export default function ContactPage() {
           {/* Action Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Contact Form Card */}
+            <a href="/membership">
             <div className="bg-[#0B4B2B] text-white p-6 rounded-lg group cursor-pointer hover:bg-gray-800 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
@@ -84,6 +85,7 @@ export default function ContactPage() {
                 <ArrowRight className="h-6 w-6 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </div>
             </div>
+            </a>
           </div>
         </div>
 

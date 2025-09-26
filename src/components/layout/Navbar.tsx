@@ -80,7 +80,7 @@ export default function Navbar() {
               <li>
                 <Link
                   className="bg-[#0B4B2B] border border-[#07572f] px-6 py-3 rounded-full flex gap-1 cursor-pointer items-center text-base font-medium hover:bg-[#0D5C36] transition text-white"
-                  href="/colegiarse"
+                  href="/membership"
                 >
                   Colegiarse
                   <ArrowUpRight className="text-white" />
@@ -157,7 +157,7 @@ export default function Navbar() {
                       <li className="pt-2">
                         <SheetClose asChild>
                           <Link
-                            href="/colegiarse"
+                            href="/membership"
                             className="inline-flex items-center gap-1 rounded-full bg-[#0B4B2B] border border-[#07572f] px-5 py-2.5 text-white font-medium hover:bg-[#0D5C36] transition"
                           >
                             Colegiarse
