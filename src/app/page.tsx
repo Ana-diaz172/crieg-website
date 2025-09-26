@@ -2,6 +2,7 @@ import AboutValues from "@/components/AboutValues";
 import HeroBanner from "@/components/HeroBanner";
 import Navbar from "@/components/layout/Navbar";
 import MemberGridWithSheets from "@/components/MemberGridWithSheets";
+import MemberShipCards from "@/components/MemberShipCards";
 import { members } from "@/mock/members";
 
 export default function Home() {
@@ -13,6 +14,9 @@ export default function Home() {
       <AboutValues />
       {/* Members Grid */}
       <MemberGridWithSheets members={members} />
+      <div className="flex justify-center my-12">
+        <MemberShipCards />
+      </div>
     </div>
   );
 }
