@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -19,9 +20,9 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { label: "FACEBOOK", href: "#" },
-    { label: "INSTAGRAM", href: "#" },
-    { label: "LINKEDIN", href: "#" },
+    { label: "FACEBOOK", href: "https://www.facebook.com/ColegiodeRadiologiaeImagendelEstadodeGuanajuato" },
+    { label: "INSTAGRAM", href: "https://www.instagram.com/crieg.guanajuato/#" },
+    { label: "YOUTUBE", href: "https://www.youtube.com/@CRIEGGuanajuato/videos" },
   ];
 
   const legalLinks = [
@@ -37,23 +38,23 @@ export default function Footer() {
         <div className="hidden md:block py-6">
           <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
             {mainLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
                 href={link.href}
                 className="text-sm font-medium text-gray-700 hover:underline transition-colors duration-200 tracking-wide"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <span className="hidden lg:block text-gray-300">|</span>
             {socialLinks.map((link, index) => (
-              <a
+              <Link
                 key={index}
                 href={link.href}
                 className="text-sm font-medium text-gray-700 hover:underline transition-colors duration-200 tracking-wide"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -86,13 +87,13 @@ export default function Footer() {
               ))}
               <div className="border-t border-gray-200 mt-4 pt-4">
                 {socialLinks.map((link, index) => (
-                  <a
+                  <Link
                     key={index}
                     href={link.href}
                     className="block px-4 py-2 text-sm font-medium text-gray-700 hover:underline hover:bg-gray-50 transition-colors duration-200"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

@@ -33,7 +33,8 @@ export default function HeroBanner() {
               Nuestro principal objetivo es la educación médica continua
               involucrando a nuestros médicos desde su residencia.
             </p>
-
+            
+            <a href="/membership">
             <button
               type="button"
               className="bg-[#0B4B2B] border border-[#07572f] px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
@@ -42,6 +43,7 @@ export default function HeroBanner() {
               Colegiarse
               <ArrowUpRight className="text-white" />
             </button>
+            </a>
 
           </div>
         </div>
