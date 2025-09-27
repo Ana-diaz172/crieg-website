@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, redirect } from "next/navigation";
 import { Check } from "lucide-react";
 
-export default function SuccessPage() {
+export default function SuccessPage({
+  searchParams,
+}: {
+  searchParams: { session_id?: string };
+}) {
   const [loading, setLoading] = useState(true);
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get("session_id");
+
+  const sessionId = searchParams.session_id;
+  if (!sessionId) redirect("/");
 
   useEffect(() => {
     if (sessionId) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 const memberships = {
@@ -28,9 +28,11 @@ const memberships = {
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const searchParams = useSearchParams();
+  const params = useParams();
   const router = useRouter();
-  const membershipId = searchParams.get("membership");
+
+  // Usar parámetros de la URL en lugar de searchParams
+  const membershipId = params.membership as string;
 
   const membership = membershipId
     ? memberships[membershipId as keyof typeof memberships]
