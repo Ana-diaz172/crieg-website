@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter, redirect } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 
-export default function SuccessPage({
-  searchParams,
-}: {
-  searchParams: { session_id?: string };
-}) {
+function SuccessContent() {
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
   const router = useRouter();
-
-  const sessionId = searchParams.session_id;
-  if (!sessionId) redirect("/");
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
     if (sessionId) {
@@ -40,16 +35,13 @@ export default function SuccessPage({
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Check className="w-8 h-8 text-green-600" />
         </div>
-
         <h1 className="text-2xl font-semibold text-gray-900 mb-4">
           ¡Pago exitoso!
         </h1>
-
         <p className="text-gray-600 mb-8">
           Tu membresía ha sido activada correctamente. Recibirás un correo de
           confirmación en breve.
         </p>
-
         <button
           onClick={() => router.push("/")}
           className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
@@ -58,5 +50,23 @@ export default function SuccessPage({
         </button>
       </div>
     </div>
+  );
+}
+
+// Componente principal con Suspense
+export default function SuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0B4B2B] mx-auto"></div>
+            <p className="mt-4 text-gray-600">Cargando...</p>
+          </div>
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
   );
 }

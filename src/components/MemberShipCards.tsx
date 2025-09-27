@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { BriefcaseMedical, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ type Membership = {
   priceSuffixLines?: string[];
   ctaLabel?: string;
   features: string[];
-  priceAmount: number; // Nuevo campo para el monto en centavos
+  priceAmount: number;
 };
 
 function MembershipCard({
@@ -31,8 +31,8 @@ function MembershipCard({
     Array.isArray(priceSuffixLines) && priceSuffixLines.length > 0;
 
   const handleSelectMembership = () => {
-    // Navegar a checkout con el ID de la membresía
-    router.push(`/checkout?membership=${id}`);
+    // CAMBIO IMPORTANTE: Usar parámetros de ruta en lugar de query string
+    router.push(`/checkout/${id}`);
   };
 
   return (
@@ -95,7 +95,7 @@ const memberships: Membership[] = [
       "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG vigente.",
     price: "$2,600",
     priceSuffix: "/anual 2025",
-    priceAmount: 260000, // $2,600 en centavos
+    priceAmount: 260000,
     features: [
       "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
       "Regularización automática al pagar la cuota 2025.",
@@ -109,7 +109,7 @@ const memberships: Membership[] = [
       "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día con regularización automática.",
     price: "$600",
     priceSuffix: "/anual 2025",
-    priceAmount: 60000, // $600 en centavos
+    priceAmount: 60000,
     features: [
       "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
       "Regularización automática al pagar la cuota 2025.",
@@ -122,7 +122,7 @@ const memberships: Membership[] = [
       "Disfruta costos preferenciales en congresos, acceso a contenido académico exclusivo y reconocimiento oficial con la carta de pertenencia a la FMRI.",
     price: "$4,000",
     priceSuffixLines: ["/hasta el 9 de marzo", "2025"],
-    priceAmount: 400000, // $4,000 en centavos
+    priceAmount: 400000,
     features: [
       "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
       "Acceso al Journal con contenido académico exclusivo.",
