@@ -3,7 +3,7 @@ import { Member } from "@/interface/Member";
 export const members: Member[] = [
     {
         id: 1,
-        name: "Dr. Juan Pérez",
+        name: "Dr. Juan Pérez ",
         specialty: "Presidente",
         image: "/members/member-1.jpg",
     },
