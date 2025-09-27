@@ -16,7 +16,7 @@ export default function MainProvider({
   );
   const fetchClientSecret = async () => {
     try {
-      const response = await axios.post("/create-checkout-session");
+      const response = await axios.post("/api/create-checkout-session");
       return response.data.checkoutSessionClientSecret;
     } catch (error) {
       console.error("Error fetching client secret:", error);
@@ -25,9 +25,7 @@ export default function MainProvider({
   };
   return (
     <CheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
-      <Navbar />
       {children}
-      <Footer />
     </CheckoutProvider>
   );
 }

@@ -8,14 +8,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const memberships = {
     'crieg-medicos': {
         name: 'Membresía Médicos Radiólogos CRIEG',
+        description: 'Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG vigente.',
         amount: 260000,
     },
     'crieg-residentes': {
         name: 'Membresía Residentes CRIEG',
+        description: 'Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día con regularización automática.',
         amount: 60000,
     },
     'fmri': {
         name: 'Membresía FMRI',
+        description: 'Disfruta costos preferenciales en congresos, acceso a contenido académico exclusivo y reconocimiento oficial con la carta de pertenencia a la FMRI.',
         amount: 400000,
     },
 };
@@ -37,6 +40,7 @@ export async function POST(request: NextRequest) {
                         currency: 'mxn',
                         product_data: {
                             name: membership.name,
+                            description: membership.description,
                         },
                         unit_amount: membership.amount,
                     },
