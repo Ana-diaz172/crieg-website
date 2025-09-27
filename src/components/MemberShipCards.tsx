@@ -1,4 +1,7 @@
+'use client';
+
 import { BriefcaseMedical, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Membership = {
   id: string;
@@ -9,9 +12,11 @@ type Membership = {
   priceSuffixLines?: string[];
   ctaLabel?: string;
   features: string[];
+  priceAmount: number; // Nuevo campo para el monto en centavos
 };
 
 function MembershipCard({
+  id,
   title,
   description,
   price,
@@ -19,9 +24,16 @@ function MembershipCard({
   priceSuffixLines,
   ctaLabel = "Seleccionar membresía",
   features,
+  priceAmount,
 }: Membership) {
+  const router = useRouter();
   const hasMultiLineSuffix =
     Array.isArray(priceSuffixLines) && priceSuffixLines.length > 0;
+
+  const handleSelectMembership = () => {
+    // Navegar a checkout con el ID de la membresía
+    router.push(`/checkout?membership=${id}`);
+  };
 
   return (
     <div className="border rounded-xl shadow-sm p-6 flex flex-col">
@@ -32,7 +44,6 @@ function MembershipCard({
       />
       <p className="text-sm font-normal text-gray-500 mb-6">{description}</p>
 
-      {/* Price block (handles single-line or multi-line suffix) */}
       {hasMultiLineSuffix ? (
         <div className="flex items-center mb-6">
           <p className="text-5xl font-semibold text-[#0B4B2B] m-0">{price}</p>
@@ -56,7 +67,10 @@ function MembershipCard({
         </p>
       )}
 
-      <button className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-2 rounded-lg font-medium mb-6">
+      <button
+        onClick={handleSelectMembership}
+        className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-2 rounded-lg font-medium mb-6"
+      >
         {ctaLabel}
       </button>
 
@@ -81,6 +95,7 @@ const memberships: Membership[] = [
       "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG vigente.",
     price: "$2,600",
     priceSuffix: "/anual 2025",
+    priceAmount: 260000, // $2,600 en centavos
     features: [
       "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
       "Regularización automática al pagar la cuota 2025.",
@@ -94,6 +109,7 @@ const memberships: Membership[] = [
       "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día con regularización automática.",
     price: "$600",
     priceSuffix: "/anual 2025",
+    priceAmount: 60000, // $600 en centavos
     features: [
       "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
       "Regularización automática al pagar la cuota 2025.",
@@ -106,6 +122,7 @@ const memberships: Membership[] = [
       "Disfruta costos preferenciales en congresos, acceso a contenido académico exclusivo y reconocimiento oficial con la carta de pertenencia a la FMRI.",
     price: "$4,000",
     priceSuffixLines: ["/hasta el 9 de marzo", "2025"],
+    priceAmount: 400000, // $4,000 en centavos
     features: [
       "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
       "Acceso al Journal con contenido académico exclusivo.",
