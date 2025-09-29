@@ -8,9 +8,9 @@ function SuccessContent() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get("session_id");
+  const sessionId = searchParams.get("session_id");//
 
-  useEffect(() => {
+  useEffect(() => {//verifica si hay un evento (revisar su hay un session_id)
     if (sessionId) {
       setLoading(false);
     } else {
@@ -29,7 +29,7 @@ function SuccessContent() {
     );
   }
 
-  return (
+  return ( //verificando pago
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-8 text-center">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">

@@ -32,16 +32,7 @@ export default function ContactPage() {
           {/* Contact Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
             {/* Office */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                Oficina Principal
-              </h3>
-              <div className="text-gray-900">
-                <p>Boulevard Adolfo López Mateos 1905</p>
-                <p>León, Guanajuato 37270</p>
-                <p>México</p>
-              </div>
-            </div>
+
 
             {/* Email */}
             <div>
