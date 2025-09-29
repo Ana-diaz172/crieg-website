@@ -1,13 +1,14 @@
 import { Client } from '@hubspot/api-client';
+import { FilterOperatorEnum } from '@hubspot/api-client/lib/codegen/crm/contacts/models/Filter';
 
 const hubspotClient = new Client({
     accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
 });
 
-const omitUndefined = <T extends Record<string, any>>(obj: T): Partial<T> =>
+const omitUndefined = <T extends Record<string, any>>(obj: T): Record<string, string> =>
     Object.fromEntries(
         Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== '')
-    ) as Partial<T>;
+    ) as Record<string, string>;
 
 export interface ContactData {
     firstName: string;
@@ -16,7 +17,7 @@ export interface ContactData {
     phone: string;
     membershipType: string;
     city: string;
-    professionalType: string;
+    professionalType: 'medico' | 'residente';
     residencyLocation?: string;
     currentResidencyYear?: string;
     headProfessorName?: string;
@@ -27,7 +28,8 @@ export async function createOrUpdateContact(
     stripeSessionId?: string
 ) {
     try {
-        const properties = omitUndefined({
+        // props para crear
+        const contactProps: Record<string, string> = omitUndefined({
             firstname: data.firstName,
             lastname: data.lastName,
             email: data.email,
@@ -42,11 +44,12 @@ export async function createOrUpdateContact(
         });
 
         const response = await hubspotClient.crm.contacts.basicApi.create({
-            properties,
+            properties: contactProps,
         });
 
         return { success: true, contactId: response.id };
     } catch (error: any) {
+        // 409 = ya existe -> buscar y actualizar
         if (error.statusCode === 409) {
             try {
                 const searchResponse = await hubspotClient.crm.contacts.searchApi.doSearch({
@@ -55,7 +58,7 @@ export async function createOrUpdateContact(
                             filters: [
                                 {
                                     propertyName: 'email',
-                                    operator: 'EQ', // ✅ Esto es válido en v13.4.0
+                                    operator: FilterOperatorEnum.Eq, // ✅ enum, no string
                                     value: data.email,
                                 },
                             ],
@@ -66,7 +69,26 @@ export async function createOrUpdateContact(
 
                 if (searchResponse.results?.length > 0) {
                     const contactId = searchResponse.results[0].id;
-                    await hubspotClient.crm.contacts.basicApi.update(contactId, { properties });
+
+                    // props para actualizar (recrea el objeto en este scope)
+                    const updateProps: Record<string, string> = omitUndefined({
+                        firstname: data.firstName,
+                        lastname: data.lastName,
+                        email: data.email,
+                        phone: data.phone,
+                        city: data.city,
+                        membership_type: data.membershipType,
+                        professional_type: data.professionalType,
+                        residency_location: data.residencyLocation,
+                        current_residency_year: data.currentResidencyYear,
+                        head_professor_name: data.headProfessorName,
+                        stripe_session_id: stripeSessionId,
+                    });
+
+                    await hubspotClient.crm.contacts.basicApi.update(contactId, {
+                        properties: updateProps,
+                    });
+
                     return { success: true, contactId };
                 }
 
@@ -94,7 +116,7 @@ export async function updateContactWithPaymentStatus(
                     filters: [
                         {
                             propertyName: 'email',
-                            operator: 'EQ', // ✅ Válido
+                            operator: FilterOperatorEnum.Eq, // ✅ enum correcto
                             value: email,
                         },
                     ],
@@ -109,14 +131,17 @@ export async function updateContactWithPaymentStatus(
 
         const contactId = searchResponse.results[0].id;
 
-        const properties = omitUndefined({
+        const props: Record<string, string> = omitUndefined({
             payment_status: paymentStatus,
             stripe_session_id: stripeSessionId,
             last_payment_date:
                 paymentStatus === 'completed' ? new Date().toISOString() : undefined,
         });
 
-        await hubspotClient.crm.contacts.basicApi.update(contactId, { properties });
+        await hubspotClient.crm.contacts.basicApi.update(contactId, {
+            properties: props,
+        });
+
         return { success: true, contactId };
     } catch (error: any) {
         console.error('Error updating payment status:', error);
