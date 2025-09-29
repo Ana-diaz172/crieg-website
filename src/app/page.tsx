@@ -1,6 +1,5 @@
 import AboutValues from "@/components/AboutValues";
 import HeroBanner from "@/components/HeroBanner";
-import Navbar from "@/components/layout/Navbar";
 import MemberGridWithSheets from "@/components/MemberGridWithSheets";
 import MemberShipCards from "@/components/MemberShipCards";
 import { members } from "@/mock/members";

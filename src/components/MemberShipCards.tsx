@@ -31,7 +31,6 @@ function MembershipCard({
     Array.isArray(priceSuffixLines) && priceSuffixLines.length > 0;
 
   const handleSelectMembership = () => {
-    // CAMBIO IMPORTANTE: Usar parámetros de ruta en lugar de query string
     router.push(`/checkout/${id}`);
   };
 
@@ -69,7 +68,7 @@ function MembershipCard({
 
       <button
         onClick={handleSelectMembership}
-        className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-2 rounded-lg font-medium mb-6"
+        className="w-full cursor-pointer bg-[#0B4B2B] hover:bg-green-800 text-white py-2 rounded-lg font-medium mb-6"
       >
         {ctaLabel}
       </button>
