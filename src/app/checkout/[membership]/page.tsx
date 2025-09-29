@@ -427,7 +427,7 @@ export default function CheckoutPage() {
         <div className="hidden lg:block lg:w-1/2 xl:w-1/2 relative">
           <div className="sticky top-0 h-screen">
             <Image
-              src="/form-banner.png"
+              src="/form-banner.webp"
               alt="Equipo médico de radiología"
               fill
               className="object-cover"
