@@ -26,6 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <script
+        type="text/javascript"
+        id="hs-script-loader"
+        async
+        defer
+        src="//js.hs-scripts.com/20923872.js"
+      ></script>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
