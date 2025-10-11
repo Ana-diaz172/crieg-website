@@ -1,3 +1,4 @@
+import Image from "next/image";
 
 export default function AboutDetailedPage() {
   const partnerships = [
@@ -37,34 +38,14 @@ export default function AboutDetailedPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-20">
           {/* Left: Medical Building Illustration */}
           <div className="flex flex-col items-center">
-            <div className="bg-gray-100 backdrop-blur-sm rounded-2xl p-8 w-full max-w-md border border-gray-200">
-              <div className="relative">
-                {/* Medical building illustration */}
-                <div className="w-full h-64 flex items-center justify-center">
-                  <div className="relative">
-                    {/* Main building structure */}
-                    <div className="bg-blue-500/80 w-48 h-32 rounded-t-lg relative shadow-lg">
-                      {/* Cross symbol */}
-                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-                        <div className="w-8 h-2 bg-red-500 rounded"></div>
-                        <div className="w-2 h-8 bg-red-500 rounded absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-3"></div>
-                      </div>
-                      {/* Windows */}
-                      <div className="grid grid-cols-4 gap-2 mt-12 px-4">
-                        {Array.from({ length: 8 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="w-4 h-4 bg-yellow-300 rounded-sm"
-                          ></div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Building base */}
-                    <div className="bg-blue-400/80 w-52 h-8 rounded-b-lg -mt-2 shadow-md"></div>
-                    {/* Foundation */}
-                    <div className="bg-blue-300/60 w-56 h-4 rounded-b-lg -mt-2 shadow-sm"></div>
-                  </div>
-                </div>
+            <div className="bg-gray-100 backdrop-blur-sm w-full max-w-md">
+              <div className="relative w-full h-[300px]">
+                <Image 
+                  src="/about-crieg.png"
+                  alt="Ilustración de un edificio médico"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
           </div>
@@ -149,7 +130,6 @@ export default function AboutDetailedPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
           {/* Left Card - Mission */}
           <div className="space-y-6">
-
             <div>
               <h3 className="text-2xl font-light mb-4 text-gray-900">
                 Todo comienza construyendo
@@ -186,7 +166,6 @@ export default function AboutDetailedPage() {
 
           {/* Right Card - Certification */}
           <div className="space-y-6">
-
             <div>
               <h3 className="text-2xl font-light mb-4 text-gray-900">
                 Cómo tu certificación CMRI
