@@ -40,7 +40,7 @@ export default function AboutDetailedPage() {
           <div className="flex flex-col items-center">
             <div className="bg-gray-100 backdrop-blur-sm w-full max-w-md">
               <div className="relative w-full h-[300px]">
-                <Image 
+                <Image
                   src="/about-crieg.png"
                   alt="Ilustración de un edificio médico"
                   fill
@@ -193,19 +193,8 @@ export default function AboutDetailedPage() {
               <p className="text-gray-700 leading-relaxed mb-6">
                 Nuestras instituciones aliadas participan en sus propias redes
                 educativas que incluyen varios centros médicos certificados —
-                todos se pueden encontrar en los{" "}
-                <span className="text-blue-500 underline cursor-pointer">
-                  Documentos CMRI
-                </span>
-                ,
-                <span className="text-blue-500 underline cursor-pointer ml-1">
-                  Documentos Académicos
-                </span>
-                , o
-                <span className="text-blue-500 underline cursor-pointer ml-1">
-                  Documentos de Certificación
-                </span>{" "}
-                en nuestra página Legal.
+                todos se pueden encontrar en los Documentos CMRI , Documentos
+                Académicos, Documentos de Certificación en nuestra página Legal.
               </p>
 
               <p className="text-gray-700 leading-relaxed mb-6">
@@ -215,12 +204,9 @@ export default function AboutDetailedPage() {
               </p>
 
               <p className="text-gray-700 leading-relaxed">
-                Para diversificar tus créditos, puedes usar{" "}
-                <span className="text-blue-500 underline cursor-pointer">
-                  CRIEG Academy
-                </span>{" "}
-                para asignar cualquiera de tus fondos excedentes — por ejemplo,
-                más allá de los 50 puntos asegurados — hacia programas de
+                Para diversificar tus créditos, puedes usar CRIEG Academy para
+                asignar cualquiera de tus fondos excedentes — por ejemplo, más
+                allá de los 50 puntos asegurados — hacia programas de
                 investigación que están invertidos en desarrollo académico a
                 largo plazo.
               </p>
