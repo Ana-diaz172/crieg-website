@@ -116,7 +116,7 @@ export async function updateContactWithPaymentStatus(
                     filters: [
                         {
                             propertyName: 'email',
-                            operator: FilterOperatorEnum.Eq, // ✅ enum correcto
+                            operator: FilterOperatorEnum.Eq,
                             value: email,
                         },
                     ],
@@ -147,4 +147,33 @@ export async function updateContactWithPaymentStatus(
         console.error('Error updating payment status:', error);
         return { success: false, error: error.message || 'Unknown error' };
     }
+}
+
+export async function findContactByEmail(email: string) {
+    const search = await hubspotClient.crm.contacts.searchApi.doSearch({
+        filterGroups: [
+            {
+                filters: [
+                    {
+                        propertyName: 'email',
+                        operator: FilterOperatorEnum.Eq,
+                        value: email,
+                    },
+                ],
+            },
+        ],
+        limit: 1,
+        properties: ['firstname', 'lastname', 'email', 'payment_status', 'stripe_session_id'],
+    });
+
+    if (!search.results?.length) return null;
+    const c = search.results[0] as any;
+    return {
+        id: c.id,
+        firstname: c.properties?.firstname || '',
+        lastname: c.properties?.lastname || '',
+        email: c.properties?.email || '',
+        payment_status: c.properties?.payment_status || '',
+        stripe_session_id: c.properties?.stripe_session_id || '',
+    };
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUpRight, Star } from "lucide-react";
+import { ArrowUpRight, ScrollText, Star } from "lucide-react";
+import Link from "next/link";
 
 export default function HeroBanner() {
   return (
@@ -33,18 +34,25 @@ export default function HeroBanner() {
               Nuestro principal objetivo es la educación médica continua
               involucrando a nuestros médicos desde su residencia.
             </p>
-            
-            <a href="/membership">
-            <button
-              type="button"
-              className="bg-[#0B4B2B] border border-[#07572f] px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
-              aria-label="Ir a Colegiarse"
-            >
-              Colegiarse
-              <ArrowUpRight className="text-white" />
-            </button>
-            </a>
 
+            <div className="flex gap-4">
+              <Link
+                className="bg-[#0B4B2B] border border-[#07572f] px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
+                aria-label="Ir a Colegiarse"
+                href="/membership"
+              >
+                Colegiarse
+                <ArrowUpRight className="text-white" />
+              </Link>
+              <Link
+                className="border border-white px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
+                aria-label="Ir a Colegiarse"
+                href="/billing"
+              >
+                Facturar
+                <ScrollText className="text-white size-5" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>

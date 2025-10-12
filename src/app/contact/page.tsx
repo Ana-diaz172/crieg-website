@@ -53,10 +53,10 @@ export default function ContactPage() {
                 Teléfono
               </h3>
               <a
-                href="tel:+52477123456"
+                href="tel:+524775907050"
                 className="text-gray-900 hover:text-green-600 transition-colors"
               >
-                +52 477 123 4567
+                +52 477 590 70 50
               </a>
             </div>
           </div>

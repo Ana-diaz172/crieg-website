@@ -2,15 +2,16 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { Check, Download } from "lucide-react";
 
 function SuccessContent() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get("session_id");//
+  const sessionId = searchParams.get("session_id"); //
 
-  useEffect(() => {//verifica si hay un evento (revisar su hay un session_id)
+  useEffect(() => {
+    //verifica si hay un evento (revisar su hay un session_id)
     if (sessionId) {
       setLoading(false);
     } else {
@@ -29,7 +30,8 @@ function SuccessContent() {
     );
   }
 
-  return ( //verificando pago
+  return (
+    //verificando pago
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-8 text-center">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -42,9 +44,16 @@ function SuccessContent() {
           Tu membresía ha sido activada correctamente. Recibirás un correo de
           confirmación en breve.
         </p>
+        <a
+          href={`/api/certificate?session_id=${sessionId}`}
+          className="gap-3 w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 justify-center items-center rounded-lg font-medium flex mb-3"
+        >
+          <p>Descargar Reconocimiento</p>
+          <Download className="size-5" />
+        </a>
         <button
           onClick={() => router.push("/")}
-          className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
+          className="w-full bg-[#0B4B2B] cursor-pointer hover:bg-green-800 text-white py-3 rounded-lg font-medium"
         >
           Volver al inicio
         </button>
@@ -53,7 +62,6 @@ function SuccessContent() {
   );
 }
 
-// Componente principal con Suspense
 export default function SuccessPage() {
   return (
     <Suspense
