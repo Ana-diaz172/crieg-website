@@ -137,7 +137,7 @@ export default function Navbar() {
                       <li>
                         <SheetClose asChild>
                           <Link
-                            href="/acerca"
+                            href="/about"
                             className="block rounded-md px-3 py-2 text-gray-900 hover:bg-gray-100"
                           >
                             Acerca de nosotros
@@ -147,7 +147,7 @@ export default function Navbar() {
                       <li>
                         <SheetClose asChild>
                           <Link
-                            href="/contacto"
+                            href="/contact"
                             className="block rounded-md px-3 py-2 text-gray-900 hover:bg-gray-100"
                           >
                             Contacto
