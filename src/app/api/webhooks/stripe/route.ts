@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { updateContactWithPaymentStatus, createOrUpdateContact, findContactByEmail } from '@/lib/hubspot';
-import { generateCertificateBuffer } from '@/lib/certificate'; // tu helper
+import { generateCertificateBuffer } from '@/lib/certificate';
 import { sendCertificateEmail } from '@/lib/email-resend';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
