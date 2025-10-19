@@ -1,3 +1,4 @@
+// src/lib/certificate.ts
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
@@ -7,14 +8,41 @@ type GenerateOptions = {
     contactId: string;
     sessionId?: string;
     offsetX?: number;
+    /** En prod, base del sitio para hacer fetch de /cert-template.pdf.
+     *  Ej: process.env.NEXT_PUBLIC_DOMAIN o `https://${process.env.VERCEL_URL}`
+     *  o derivado del request: `${req.nextUrl.protocol}//${req.headers.get('host')}`
+     */
+    baseUrl?: string;
 };
 
 export async function generateCertificateBuffer(opts: GenerateOptions): Promise<Buffer> {
-    const { fullName, contactId, sessionId, offsetX = -70 } = opts;
+    const { fullName, contactId, sessionId, offsetX = -70, baseUrl } = opts;
 
-    // 1) Cargar plantilla
-    const templatePath = path.resolve(process.cwd(), 'public', 'cert-template.pdf');
-    const templateBytes = await fs.readFile(templatePath);
+    const isVercel = !!process.env.VERCEL;
+    let templateBytes: Uint8Array;
+
+    if (!isVercel) {
+        // Local (FS)
+        const templatePath = path.resolve(process.cwd(), 'public', 'cert-template.pdf');
+        const buf = await fs.readFile(templatePath);
+        templateBytes = new Uint8Array(buf);
+    } else {
+        // Producción (Vercel) -> fetch a la URL pública
+        const base =
+            baseUrl ||
+            process.env.NEXT_PUBLIC_DOMAIN ||
+            (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+
+        if (!base) {
+            throw new Error('No puedo resolver baseUrl para cargar /cert-template.pdf en producción');
+        }
+
+        const url = `${base.replace(/\/$/, '')}/cert-template.pdf`;
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Error cargando plantilla (${res.status})`);
+        templateBytes = new Uint8Array(await res.arrayBuffer());
+    }
+
     const pdfDoc = await PDFDocument.load(templateBytes);
     const page = pdfDoc.getPages()[0];
 
@@ -40,8 +68,10 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     let footerSize = 10;
 
     let footerText = `${contactId}`;
-    let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
+    if (sessionId) footerText += `  |  Session: ${sessionId}`;
+
     const maxWidth = width - rightMargin - 24;
+    let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
     while (footerWidth > maxWidth && footerSize > 6) {
         footerSize -= 0.5;
         footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);

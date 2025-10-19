@@ -1,6 +1,7 @@
+// src/app/api/webhooks/stripe/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { updateContactWithPaymentStatus, createOrUpdateContact, findContactByEmail } from '@/lib/hubspot';
+import { updateContactWithPaymentStatus, findContactByEmail } from '@/lib/hubspot';
 import { generateCertificateBuffer } from '@/lib/certificate';
 import { sendCertificateEmail } from '@/lib/email-resend';
 
@@ -45,11 +46,16 @@ export async function POST(request: NextRequest) {
 
                     console.log('[WEBHOOK] contactId:', contact?.id, 'fullName:', fullName);
 
+                    const baseUrl =
+                        process.env.NEXT_PUBLIC_DOMAIN ||
+                        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+
                     const pdf = await generateCertificateBuffer({
                         fullName,
                         contactId: contact?.id ?? 'N/A',
                         sessionId: session.id,
                         offsetX: -70,
+                        baseUrl, // 👈 importante en prod
                     });
 
                     console.log('[WEBHOOK] pdf bytes:', pdf.byteLength);
