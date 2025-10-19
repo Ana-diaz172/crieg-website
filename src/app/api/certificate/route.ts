@@ -162,5 +162,66 @@ export async function GET(req: NextRequest) {
     }
 }
 
+export async function generateCertificateBuffer(opts: {
+    fullName: string;
+    contactId: string;
+    sessionId?: string;
+    offsetX?: number;
+}) {
+    const { fullName, contactId, sessionId, offsetX = -70 } = opts;
+
+    const templatePath = path.resolve(process.cwd(), 'public', 'cert-template.pdf');
+    const templateBytes = await fs.readFile(templatePath);
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    const page = pdfDoc.getPages()[0];
+
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontSize = 24;
+    const text = fullName.toUpperCase();
+    const textWidth = font.widthOfTextAtSize(text, fontSize);
+    const { width, height } = page.getSize();
+
+    const x = (width - textWidth) / 2 + offsetX;
+    const y = height * 0.45;
+
+    page.drawText(text, {
+        x, y, size: fontSize, font,
+        color: rgb(0.043, 0.294, 0.169),
+    });
+
+    // Footer con IDs (esquina inferior derecha)
+    const footerFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const rightMargin = 24;
+    const bottomMargin = 18;
+    let footerSize = 12;
+
+    let footerText = `ID: ${contactId}`;
+    if (sessionId) footerText += `  |  Session: ${sessionId}`;
+
+    const maxWidth = width - rightMargin - 24;
+    let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
+    while (footerWidth > maxWidth && footerSize > 6) {
+        footerSize -= 0.5;
+        footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
+    }
+    const fx = width - rightMargin - footerWidth;
+    const fy = bottomMargin;
+
+    page.drawText(footerText, {
+        x: fx, y: fy, size: footerSize, font: footerFont, color: rgb(0.2, 0.2, 0.2),
+    });
+
+    // Metadata
+    pdfDoc.setTitle('Reconocimiento');
+    pdfDoc.setAuthor('CRIEG / FMRI');
+    pdfDoc.setSubject('Reconocimiento oficial de membresía 2025');
+    pdfDoc.setProducer('CRIEG Certificate Generator');
+    pdfDoc.setCreator('CRIEG Website');
+    pdfDoc.setCreationDate(new Date());
+
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+}
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

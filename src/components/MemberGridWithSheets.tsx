@@ -197,7 +197,7 @@ export default function MemberGridWithSheets({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14">
         {list.map((member) => (
           <div key={member.id}>
-            <div className="relative w-full h-auto mb-2 bg-gray-100">
+            <div className="relative w-full h-auto mb-2 rounded-lg">
               <Image
                 src={member.image}
                 alt={member.name}

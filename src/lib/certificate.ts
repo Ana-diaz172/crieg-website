@@ -39,7 +39,7 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     const bottomMargin = 18;
     let footerSize = 10;
 
-    let footerText = `HubSpot ID: ${contactId}${sessionId ? `  |  Session: ${sessionId}` : ''}`;
+    let footerText = `${contactId}`;
     let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
     const maxWidth = width - rightMargin - 24;
     while (footerWidth > maxWidth && footerSize > 6) {
