@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ArrowLeft,
-
   FileCheck,
   FileText,
   FileUser,
@@ -237,7 +236,7 @@ export default function BillingForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="taxRegime">Tax Regime *</Label>
+          <Label htmlFor="taxRegime">Régimen Fiscal *</Label>
           <Select
             key={`taxRegime-${currentStep}`} // Force re-render with key
             value={formData.taxRegime}
@@ -265,7 +264,7 @@ export default function BillingForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="postalCode">Postal Code *</Label>
+          <Label htmlFor="postalCode">Código Postal *</Label>
           <Input
             id="postalCode"
             value={formData.postalCode}
@@ -289,7 +288,7 @@ export default function BillingForm() {
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="cfdiUsage">CFDI Usage *</Label>
+          <Label htmlFor="cfdiUsage">Uso CFDI *</Label>
           <Select
             key={`cfdiUsage-${currentStep}`} // Force re-render with key
             value={formData.cfdiUsage}
@@ -297,7 +296,7 @@ export default function BillingForm() {
             required
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select CFDI usage" />
+              <SelectValue placeholder="Selecciona el Uso de CFDI" />
             </SelectTrigger>
             <SelectContent className="w-full max-w-[400px]">
               {cfdiUsages.map((item) => (
@@ -314,7 +313,7 @@ export default function BillingForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="paymentMethod">Payment Method *</Label>
+          <Label htmlFor="paymentMethod">Método de Pago *</Label>
           <Select
             key={`paymentMethod-${currentStep}`} // Force re-render with key
             value={formData.paymentMethod}
@@ -322,7 +321,7 @@ export default function BillingForm() {
             required
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select payment method" />
+              <SelectValue placeholder="Selecciona el Método de Pago" />
             </SelectTrigger>
             <SelectContent className="w-full max-w-[400px]">
               {paymentMethods.map((item) => (
@@ -339,7 +338,7 @@ export default function BillingForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="paymentForm">Payment Form *</Label>
+          <Label htmlFor="paymentForm">Forma de Pago *</Label>
           <Select
             key={`paymentForm-${currentStep}`} // Force re-render with key
             value={formData.paymentForm}
@@ -347,7 +346,7 @@ export default function BillingForm() {
             required
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select payment form" />
+              <SelectValue placeholder="Selecciona la Forma de Pago" />
             </SelectTrigger>
             <SelectContent className="w-full max-w-[400px]">
               {paymentForms.map((item) => (
@@ -370,28 +369,28 @@ export default function BillingForm() {
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h2 className="text-xl font-bold text-gray-900">
-          Confirmation and Sending
+          Confirmación y Envío
         </h2>
-        <p className="text-gray-600">Review the data and send your invoice</p>
+        <p className="text-gray-600">Revise sus datos para el envío de su factura</p>
       </div>
 
       {/* Summary Section */}
       <Card className="bg-gray-50">
         <CardHeader>
-          <CardTitle className="text-lg">Invoice Summary</CardTitle>
+          <CardTitle className="text-lg">Resumen de Factura</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-semibold">Tax ID:</span>
+              <span className="font-semibold">RFC:</span>
               <p className="text-gray-600">{formData.taxId}</p>
             </div>
             <div>
-              <span className="font-semibold">Company Name:</span>
+              <span className="font-semibold">Razón Social:</span>
               <p className="text-gray-600">{formData.companyName}</p>
             </div>
             <div>
-              <span className="font-semibold">Tax Regime:</span>
+              <span className="font-semibold">Régimen Fiscal:</span>
               <p className="text-gray-600">
                 {formData.taxRegime
                   ? taxRegimes.find((item) => item.value === formData.taxRegime)
@@ -400,11 +399,11 @@ export default function BillingForm() {
               </p>
             </div>
             <div>
-              <span className="font-semibold">Postal Code:</span>
+              <span className="font-semibold">Código Postal:</span>
               <p className="text-gray-600">{formData.postalCode}</p>
             </div>
             <div>
-              <span className="font-semibold">CFDI Usage:</span>
+              <span className="font-semibold">Uso CFDI:</span>
               <p className="text-gray-600">
                 {formData.cfdiUsage
                   ? cfdiUsages.find((item) => item.value === formData.cfdiUsage)
@@ -413,7 +412,7 @@ export default function BillingForm() {
               </p>
             </div>
             <div>
-              <span className="font-semibold">Payment Method:</span>
+              <span className="font-semibold"> Método de Pago:</span>
               <p className="text-gray-600">
                 {formData.paymentMethod
                   ? paymentMethods.find(
@@ -423,7 +422,7 @@ export default function BillingForm() {
               </p>
             </div>
             <div>
-              <span className="font-semibold">Payment Form:</span>
+              <span className="font-semibold">Forma de Pago:</span>
               <p className="text-gray-600">
                 {formData.paymentForm
                   ? paymentForms.find(
@@ -437,7 +436,7 @@ export default function BillingForm() {
       </Card>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email for sending *</Label>
+        <Label htmlFor="email">Email para el envío de la factura *</Label>
         <Input
           id="email"
           type="email"
@@ -464,7 +463,7 @@ export default function BillingForm() {
   };
 
   return (
-    <div className="w-full h-screen bg-white rounded-lg shadow-lg flex px-12 py-6">
+    <div className="w-full min-h-screen bg-white rounded-lg shadow-lg flex px-12 py-6 pt-30" >
       {/* Left Sidebar */}
       <div className="flex p-6 flex-col h-[100%] bg-[#FAFAFA] w-[420px] rounded-lg relative border">
         <div className="relative h-[60px] w-[60px]">
@@ -476,9 +475,9 @@ export default function BillingForm() {
           />
         </div>
         <div className="mt-8">
-          <p className="font-semibold text-lg">Steps to generate invoice</p>
+          <p className="font-semibold text-lg">Pasos para generar factura</p>
           <p className="text-sm text-gray-500">
-            Complete all the steps you are asked to generate the invoice
+            Complete todos los pasos que se piden para generar su factura
           </p>
         </div>
         <div className="flex flex-col mt-10">
@@ -501,8 +500,10 @@ export default function BillingForm() {
               )}
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-semibold">Your details</p>
-              <p className="text-sm font-regular">Complete customer details.</p>
+              <p className="text-sm font-semibold">Detalles del Cliente</p>
+              <p className="text-sm font-regular">
+                Completar datos del cliente.
+              </p>
             </div>
           </div>
           <div className="flex items-center justify-center w-[36px]">
@@ -531,8 +532,10 @@ export default function BillingForm() {
               )}
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-semibold">Invoice</p>
-              <p className="text-sm font-regular">Complete invoice details.</p>
+              <p className="text-sm font-semibold">Detalles de la Factura</p>
+              <p className="text-sm font-regular">
+                Completar datos de factura.
+              </p>
             </div>
           </div>
           <div className="flex items-center justify-center w-[36px]">
@@ -557,20 +560,14 @@ export default function BillingForm() {
               <FileCheck className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-semibold">Confirmation and Sending</p>
+              <p className="text-sm font-semibold">Confirmación y Envío</p>
               <p className="text-sm font-regular">
-                Review the data and send your invoice.
+                Revisar datos y enviar factura.
               </p>
             </div>
           </div>
         </div>
-        <button
-          type="button"
-          className="flex text-gray-500 hover:text-gray-700 items-center gap-2 absolute bottom-6 left-6 cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <p className="text-sm font-regular">Return to home</p>
-        </button>
+        
       </div>
 
       {/* Right Content */}
@@ -600,7 +597,7 @@ export default function BillingForm() {
                     className="flex items-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" />
-                    Previous
+                    Anterior
                   </Button>
 
                   {currentStep < 3 ? (
@@ -613,7 +610,7 @@ export default function BillingForm() {
                       }
                       className="flex items-center gap-2"
                     >
-                      Next
+                      Siguiente
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   ) : (
@@ -622,7 +619,7 @@ export default function BillingForm() {
                       disabled={!formData.email}
                       className="flex items-center gap-2"
                     >
-                      Generate Invoice
+                      Generar Factura
                       <FileCheck className="w-4 h-4" />
                     </Button>
                   )}
