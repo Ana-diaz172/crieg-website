@@ -4,7 +4,7 @@ import { findContactByEmail, updateHubspotContactPaymentFields } from "@/lib/hub
 import { generateCertificateBuffer } from "@/lib/certificate";
 import { sendCertificateEmail } from "@/lib/email-resend";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export const runtime = "nodejs";
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         try {
             event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
         } catch (err: any) {
-            console.error("[WEBHOOK] Signature verification failed:", err.message);
+            console.error("[WEBHOOK] Signature verification failed:", err?.message || err);
             return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
         }
 
@@ -46,15 +46,14 @@ export async function POST(request: NextRequest) {
                         ? session.customer
                         : (session.customer as any)?.id;
 
-                const pi = (paymentIntentId
-                    ? await stripe.paymentIntents.retrieve(paymentIntentId, {
-                        expand: ["latest_charge", "invoice"],
-                    })
-                    : null) as Stripe.PaymentIntent | null;
+                // Recupera PI expandiendo latest_charge e invoice
+                const pi = paymentIntentId
+                    ? await stripe.paymentIntents.retrieve(paymentIntentId, { expand: ["latest_charge", "invoice"] })
+                    : null;
 
+                // latest_charge seguro con tipos
                 let chargeId: string | null = null;
                 let receiptUrl: string | null = null;
-
                 if (pi?.latest_charge) {
                     if (typeof pi.latest_charge === "string") {
                         chargeId = pi.latest_charge;
@@ -71,22 +70,20 @@ export async function POST(request: NextRequest) {
                         ? ((pi as any).invoice as string)
                         : (pi as any)?.invoice?.id || null;
 
-                const amount =
-                    (pi as any)?.amount_received ?? session.amount_total ?? null; // en centavos
-                const currency = (pi as any)?.currency ?? session.currency ?? null;
+                const amount = (pi as Stripe.PaymentIntent | null)?.amount_received ?? session.amount_total ?? null; // centavos
+                const currency = (pi as Stripe.PaymentIntent | null)?.currency ?? session.currency ?? null;
 
-
+                // Resuelve contactId (prefer metadata; fallback por email)
                 let targetContactId = hubspotContactIdFromStripe;
                 if (!targetContactId) {
                     const email =
                         session.customer_details?.email || (session as any).customer_email || undefined;
                     if (email) {
-                        const contact = await findContactByEmail(email);
-                        targetContactId = contact?.id || null;
+                        const c = await findContactByEmail(email);
+                        targetContactId = c?.id || null;
                     }
                 }
 
-                // Persist Stripe IDs into HubSpot props
                 if (targetContactId) {
                     await updateHubspotContactPaymentFields(targetContactId, {
                         stripe_session_id: sessionId,
@@ -102,38 +99,33 @@ export async function POST(request: NextRequest) {
                     });
                 }
 
-                // OPTIONAL: your PDF + email logic
+                // (Opcional) PDF + correo
                 try {
                     const email =
                         session.customer_details?.email ||
                         (session as any).customer_email ||
                         undefined;
-
                     if (email) {
-                        const contact = await (targetContactId
-                            ? Promise.resolve({ id: targetContactId, ...(await findContactByEmail(email)) })
-                            : findContactByEmail(email));
-
-                        const fullName =
-                            `${(contact as any)?.firstname ?? ""} ${(contact as any)?.lastname ?? ""}`.trim() || "Miembro";
-
                         const baseUrl =
                             process.env.NEXT_PUBLIC_DOMAIN ||
                             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
 
                         const pdf = await generateCertificateBuffer({
-                            fullName,
+                            fullName: "", // si quieres, búscalo de HubSpot y arma el nombre
                             contactId: targetContactId ?? "N/A",
                             sessionId,
                             offsetX: -70,
                             baseUrl,
                         });
 
-                        const id = await sendCertificateEmail({ to: email, fullName, pdf });
-                        console.log("[WEBHOOK] RESEND_MAIL_SENT", { id, to: email });
+                        await sendCertificateEmail({
+                            to: email,
+                            fullName: "Miembro",
+                            pdf,
+                        });
                     }
                 } catch (e: any) {
-                    console.error("[WEBHOOK] send error:", e?.name || "ERR", e?.message || e);
+                    console.error("[WEBHOOK] send error:", e?.message || e);
                 }
 
                 break;
@@ -162,12 +154,9 @@ export async function POST(request: NextRequest) {
                         undefined;
                     if (email) {
                         const c = await findContactByEmail(email);
-                        if (c?.id) {
-                            await updateHubspotContactPaymentFields(c.id, updateProps);
-                        }
+                        if (c?.id) await updateHubspotContactPaymentFields(c.id, updateProps);
                     }
                 }
-
                 console.log("[WEBHOOK] expired ->", session.id);
                 break;
             }
@@ -177,8 +166,8 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json({ received: true });
-    } catch (error) {
-        console.error("[WEBHOOK] handler failed:", error);
+    } catch (error: any) {
+        console.error("[WEBHOOK] handler failed:", error?.message || error);
         return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
     }
 }

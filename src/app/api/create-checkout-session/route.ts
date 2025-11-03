@@ -2,13 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createOrUpdateContact } from "@/lib/hubspot";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
+// Mapea tus membresías (centavos MXN)
 const memberships = {
     "crieg-medicos": { name: "Membresía Médicos Radiólogos CRIEG", description: "...", amount: 260000 },
     "crieg-residentes": { name: "Membresía Residentes CRIEG", description: "...", amount: 60000 },
     fmri: { name: "Membresía FMRI", description: "...", amount: 400000 },
 } as const;
+
+// Helper para garantizar metadata de Stripe en string
+const toStripeMetadata = (obj: Record<string, unknown>) =>
+    Object.fromEntries(
+        Object.entries(obj)
+            .filter(([, v]) => v !== undefined && v !== null)
+            .map(([k, v]) => [k, String(v)])
+    ) as Record<string, string>;
 
 type IncomingFormData = {
     firstname: string;
@@ -25,31 +34,43 @@ type IncomingFormData = {
 
 export async function POST(request: NextRequest) {
     try {
-        const contentType = request.headers.get("content-type");
-        if (!contentType?.includes("application/json")) {
+        // Validación de envs críticas
+        if (!process.env.STRIPE_SECRET_KEY) {
+            console.error("[CREATE_SESSION] Missing STRIPE_SECRET_KEY");
+            return NextResponse.json({ error: "Server misconfigured: missing STRIPE_SECRET_KEY" }, { status: 500 });
+        }
+        if (!process.env.HUBSPOT_ACCESS_TOKEN) {
+            console.error("[CREATE_SESSION] Missing HUBSPOT_ACCESS_TOKEN");
+            return NextResponse.json({ error: "Server misconfigured: missing HUBSPOT_ACCESS_TOKEN" }, { status: 500 });
+        }
+
+        const contentType = request.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
             return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 400 });
         }
 
         const bodyText = await request.text();
-        if (!bodyText.trim()) {
-            return NextResponse.json({ error: "Request body is empty" }, { status: 400 });
-        }
+        if (!bodyText.trim()) return NextResponse.json({ error: "Request body is empty" }, { status: 400 });
 
-        let membershipId: keyof typeof memberships, formData: IncomingFormData;
+        let parsed: { membershipId: keyof typeof memberships; formData: IncomingFormData };
         try {
-            const body = JSON.parse(bodyText);
-            membershipId = body.membershipId;
-            formData = body.formData as IncomingFormData;
-        } catch {
+            parsed = JSON.parse(bodyText);
+        } catch (err) {
+            console.error("[CREATE_SESSION] JSON parse error", err);
             return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
         }
 
+        const membershipId = parsed.membershipId;
+        const formData = parsed.formData;
         if (!membershipId) return NextResponse.json({ error: "membershipId is required" }, { status: 400 });
-        const membership = memberships[membershipId];
-        if (!membership) return NextResponse.json({ error: "Invalid membership" }, { status: 400 });
         if (!formData?.email) return NextResponse.json({ error: "formData.email is required" }, { status: 400 });
 
-        // 1) Ensure HubSpot contact first (get contactId as bridge)
+        const membership = memberships[membershipId];
+        if (!membership) return NextResponse.json({ error: "Invalid membershipId" }, { status: 400 });
+
+        console.log("[CREATE_SESSION] Start:", { email: formData.email, membershipId });
+
+        // 1) Asegura contacto en HubSpot y obtén contactId
         const contactRes = await createOrUpdateContact(
             {
                 firstName: formData.firstname,
@@ -63,29 +84,52 @@ export async function POST(request: NextRequest) {
                 currentResidencyYear: formData.current_residency_year,
                 headProfessorName: formData.head_professor_name,
             },
-            undefined // no need to pass session yet
+            undefined
         );
 
         if (!contactRes?.success || !contactRes?.contactId) {
-            return NextResponse.json({ error: "Failed to create/ensure HubSpot contact" }, { status: 500 });
+            console.error("[CREATE_SESSION] HubSpot createOrUpdateContact failed:", contactRes);
+            return NextResponse.json(
+                { error: "Failed to create/update HubSpot contact", details: contactRes?.error || null },
+                { status: 500 }
+            );
         }
-        const hubspotContactId = contactRes.contactId;
+
+        const hubspotContactId = String(contactRes.contactId);
+        console.log("[CREATE_SESSION] HubSpot contactId:", hubspotContactId);
+
+        const email = String(formData.email);
+        const first = formData.firstname ?? "";
+        const last = formData.lastname ?? "";
+        const fullName = `${first} ${last}`.trim() || undefined;
 
         const domain =
             process.env.NEXT_PUBLIC_DOMAIN ||
             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-        // 2) Create/ensure Stripe Customer for better reporting
-        const customer = await stripe.customers.create({
-            email: formData.email,
-            name: `${formData.firstname} ${formData.lastname}`.trim(),
-            metadata: {
+        // 2) Crea Customer en Stripe (corrigiendo tipos)
+        const customerParams: Stripe.CustomerCreateParams = {
+            email,
+            name: fullName,
+            metadata: toStripeMetadata({
                 hubspot_contact_id: hubspotContactId,
-            },
-        });
+            }),
+        };
 
-        // 3) Create checkout session (attach HubSpot ID as client_reference_id + metadata)
-        const session = await stripe.checkout.sessions.create({
+        let customer: Stripe.Response<Stripe.Customer>;
+        try {
+            customer = await stripe.customers.create(customerParams);
+            console.log("[CREATE_SESSION] Stripe customer:", customer.id);
+        } catch (err: any) {
+            console.error("[CREATE_SESSION] stripe.customers.create error:", err?.message || err);
+            return NextResponse.json(
+                { error: "Stripe customer creation failed", details: err?.message || String(err) },
+                { status: 500 }
+            );
+        }
+
+        // 3) Crea la sesión de Checkout (corrigiendo tipos + metadata string)
+        const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: "payment",
             payment_method_types: ["card"],
             customer: customer.id,
@@ -102,16 +146,28 @@ export async function POST(request: NextRequest) {
             success_url: `${domain}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domain}/`,
             client_reference_id: hubspotContactId,
-            metadata: {
+            metadata: toStripeMetadata({
                 hubspot_contact_id: hubspotContactId,
-                membershipId: membershipId,
-                professional_type: formData.professional_type || "",
-            },
-        });
+                membershipId,
+                professional_type: formData.professional_type ?? "",
+            }),
+        };
+
+        let session: Stripe.Response<Stripe.Checkout.Session>;
+        try {
+            session = await stripe.checkout.sessions.create(sessionParams);
+            console.log("[CREATE_SESSION] Stripe session:", session.id);
+        } catch (err: any) {
+            console.error("[CREATE_SESSION] stripe.checkout.sessions.create error:", err?.message || err);
+            return NextResponse.json(
+                { error: "Stripe session creation failed", details: err?.message || String(err) },
+                { status: 500 }
+            );
+        }
 
         return NextResponse.json({ checkoutUrl: session.url, sessionId: session.id });
-    } catch (error) {
-        console.error("[CREATE_CHECKOUT_SESSION] error:", error);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("[CREATE_SESSION] Unexpected error:", error?.message || error);
+        return NextResponse.json({ error: "Internal server error", details: error?.message || null }, { status: 500 });
     }
 }
