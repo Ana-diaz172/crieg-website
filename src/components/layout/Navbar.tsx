@@ -10,23 +10,30 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
+import { twMerge } from "tailwind-merge";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const removeFixed = pathname === "/success" || pathname === "/billing";
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 0);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Asegura el valor correcto al montar (por si inicia scrolleado)
+    const syncScroll = () => setScrolled(window.scrollY > 0);
+    syncScroll();
+    window.addEventListener("scroll", syncScroll, { passive: true });
+    return () => window.removeEventListener("scroll", syncScroll);
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 transition-colors duration-300 ${
-        scrolled ? "bg-white shadow-sm" : "bg-transparent"
-      }`}
+      className={twMerge(
+        "top-0 left-0 w-full z-50 transition-colors duration-300",
+        scrolled ? "bg-white shadow-sm" : "bg-transparent",
+        "fixed",
+        removeFixed && "static"
+      )}
     >
       <div className="px-8">
         <div className="w-full max-w-7xl mx-auto flex items-center py-4">
@@ -49,9 +56,11 @@ export default function Navbar() {
           {/* Desktop nav */}
           <nav className="ml-auto hidden md:block">
             <ul
-              className={`flex gap-6 font-medium items-center transition-colors ${
-                scrolled ? "text-gray-900" : "text-white"
-              }`}
+              className={twMerge(
+                "flex gap-6 font-medium items-center transition-colors",
+                scrolled ? "text-gray-900" : "text-white",
+                removeFixed && "text-gray-900"
+              )}
             >
               <li>
                 <Link
@@ -95,17 +104,17 @@ export default function Navbar() {
               <SheetTrigger asChild>
                 <button
                   aria-label="Abrir menú"
-                  className={`inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  className={twMerge(
+                    "inline-flex items-center justify-center rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-offset-2",
                     scrolled
                       ? "text-gray-900 hover:text-gray-600 focus:ring-gray-300"
                       : "text-white hover:opacity-90 focus:ring-white/50"
-                  }`}
+                  )}
                 >
                   <Menu className="h-6 w-6" />
                 </button>
               </SheetTrigger>
 
-              {/* Drawer content */}
               <SheetContent side="right" className="w-full sm:max-w-xs p-0">
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-6">
