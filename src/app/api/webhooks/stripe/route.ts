@@ -24,6 +24,52 @@ type PaymentExtract = {
     hubspotContactId?: string | null;
 };
 
+// ---- Helpers de nombre ----
+function titleCaseName(raw: string): string {
+    return raw
+        .trim()
+        .split(/\s+/)
+        .map(w => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
+        .join(" ");
+}
+
+function nameFromEmail(email: string): string {
+    const local = email.split("@")[0] || "";
+    const cleaned = local.replace(/[._-]+/g, " ").replace(/\d+/g, "").trim();
+    return cleaned ? titleCaseName(cleaned) : "Miembro";
+}
+
+async function resolveFullName(opts: {
+    email?: string | null;
+    hubspotFirst?: string;
+    hubspotLast?: string;
+    stripeCustomerId?: string | null;
+}): Promise<string> {
+    // 1) HubSpot
+    const fromHS = `${opts.hubspotFirst || ""} ${opts.hubspotLast || ""}`.trim();
+    if (fromHS && fromHS !== "") return titleCaseName(fromHS);
+
+    // 2) Stripe Customer
+    if (opts.stripeCustomerId) {
+        try {
+            const cust = await stripe.customers.retrieve(opts.stripeCustomerId);
+            if (!("deleted" in cust)) {
+                const name = (cust as Stripe.Customer).name?.trim();
+                if (name) return titleCaseName(name);
+            }
+        } catch {
+            // ignore
+        }
+    }
+
+    // 3) Email local-part
+    if (opts.email) return nameFromEmail(opts.email);
+
+    // 4) Fallback
+    return "Miembro";
+}
+
+// ---- Extractores ----
 async function extractFromCheckoutSession(session: Stripe.Checkout.Session): Promise<PaymentExtract> {
     const out: PaymentExtract = {
         sessionId: session.id,
@@ -118,46 +164,70 @@ async function extractFromPaymentIntent(pi: Stripe.PaymentIntent): Promise<Payme
     return out;
 }
 
+// ---- HubSpot + Email (incluye nombre correcto) ----
 async function updateHubspotAndEmail(ex: PaymentExtract) {
     // 1) Resolver contacto en HubSpot
     let targetContactId = ex.hubspotContactId || null;
+    let hsFirst = "";
+    let hsLast = "";
+
+    let foundContact:
+        | (Awaited<ReturnType<typeof findContactByEmail>>)
+        | null = null;
 
     if (!targetContactId && ex.email) {
-        const found = await findContactByEmail(ex.email);
-        targetContactId = found?.id || null;
+        foundContact = await findContactByEmail(ex.email);
+        targetContactId = foundContact?.id || null;
+    } else if (ex.email) {
+        // Si ya tenemos contactId, aún vale la pena intentar leer nombres de HS por email
+        foundContact = await findContactByEmail(ex.email);
+    }
+
+    if (foundContact) {
+        hsFirst = foundContact.firstname || "";
+        hsLast = foundContact.lastname || "";
     }
 
     if (!targetContactId) {
         console.warn("[WEBHOOK] No HubSpot contact found. Skipping HS update.");
-        return;
+        // Igual intentamos enviar el email con nombre derivado
     }
 
-    // 2) Armar payload de pago
-    const paymentFields: Record<string, string> = {};
-    if (ex.sessionId) paymentFields.stripe_session_id = ex.sessionId;
-    if (ex.paymentIntentId) paymentFields.stripe_payment_intent_id = ex.paymentIntentId;
-    if (ex.chargeId) paymentFields.stripe_charge_id = ex.chargeId;
-    if (ex.invoiceId) paymentFields.stripe_invoice_id = ex.invoiceId;
-    if (ex.receiptUrl) paymentFields.stripe_receipt_url = ex.receiptUrl;
-    if (ex.customerId) paymentFields.stripe_customer_id = ex.customerId;
-    if (ex.amount != null) paymentFields.stripe_amount = String(ex.amount);
-    if (ex.currency) paymentFields.stripe_currency = ex.currency;
-    paymentFields.payment_status = "completed";
-    paymentFields.last_payment_date = new Date().toISOString();
+    // 2) Armar payload de pago (si hay contactId)
+    if (targetContactId) {
+        const paymentFields: Record<string, string> = {};
+        if (ex.sessionId) paymentFields.stripe_session_id = ex.sessionId;
+        if (ex.paymentIntentId) paymentFields.stripe_payment_intent_id = ex.paymentIntentId;
+        if (ex.chargeId) paymentFields.stripe_charge_id = ex.chargeId;
+        if (ex.invoiceId) paymentFields.stripe_invoice_id = ex.invoiceId;
+        if (ex.receiptUrl) paymentFields.stripe_receipt_url = ex.receiptUrl;
+        if (ex.customerId) paymentFields.stripe_customer_id = ex.customerId;
+        if (ex.amount != null) paymentFields.stripe_amount = String(ex.amount);
+        if (ex.currency) paymentFields.stripe_currency = ex.currency;
+        paymentFields.payment_status = "completed";
+        paymentFields.last_payment_date = new Date().toISOString();
 
-    console.log("[HUBSPOT] Updating payment fields for contact:", targetContactId);
-    console.log("[HUBSPOT] Payment properties:", paymentFields);
-    await updateHubspotContactPaymentFields(targetContactId, paymentFields);
+        console.log("[HUBSPOT] Updating payment fields for contact:", targetContactId);
+        console.log("[HUBSPOT] Payment properties:", paymentFields);
+        await updateHubspotContactPaymentFields(targetContactId, paymentFields);
+    }
 
     // 3) Enviar email con certificado si hay correo
     if (ex.email) {
+        const fullName = await resolveFullName({
+            email: ex.email || undefined,
+            hubspotFirst: hsFirst,
+            hubspotLast: hsLast,
+            stripeCustomerId: ex.customerId || null,
+        });
+
         const baseUrl =
             process.env.NEXT_PUBLIC_DOMAIN ||
             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
 
         const pdf = await generateCertificateBuffer({
-            fullName: "Miembro", // si quieres, busca el contacto y construye el nombre real
-            contactId: targetContactId,
+            fullName,
+            contactId: targetContactId || "N/A",
             sessionId: ex.sessionId || ex.paymentIntentId || "N/A",
             offsetX: -70,
             baseUrl,
@@ -165,16 +235,19 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
 
         const emailId = await sendCertificateEmail({
             to: ex.email,
-            fullName: "Miembro",
+            fullName,
             pdf,
+            invoiceUrl: ex.invoiceId ? `https://dashboard.stripe.com/invoices/${ex.invoiceId}/pdf` : null
         });
 
-        console.log(`[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email}`);
+
+        console.log(`[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email} | name: ${fullName}`);
     } else {
         console.warn("[EMAIL] No email available; skipping email send.");
     }
 }
 
+// ---- Handler principal ----
 export async function POST(request: NextRequest) {
     const started = Date.now();
 
