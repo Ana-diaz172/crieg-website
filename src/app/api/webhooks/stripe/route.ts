@@ -5,17 +5,32 @@ import { generateCertificateBuffer } from "@/lib/certificate";
 import { sendCertificateEmail } from "@/lib/email-resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Helper para procesar tareas asíncronas después de responder
+async function processAsyncTasks(tasks: Array<() => Promise<void>>) {
+    for (const task of tasks) {
+        try {
+            await task();
+        } catch (err: any) {
+            console.error("[WEBHOOK] Async task error:", err?.message || err);
+        }
+    }
+}
+
 export async function POST(request: NextRequest) {
+    const startTime = Date.now();
+
     try {
-        // 1) Verifica firma y construye evento
+        // ========================================
+        // 1) VERIFICACIÓN DE FIRMA (crítico, rápido)
+        // ========================================
         const rawBody = await request.text();
         const signature = request.headers.get("stripe-signature");
+
         if (!signature) {
             console.error("[WEBHOOK] Missing signature header");
             return NextResponse.json({ error: "No signature found" }, { status: 400 });
@@ -29,151 +44,258 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
         }
 
-        console.log("[WEBHOOK] type:", event.type);
+        console.log(`[WEBHOOK] Event received: ${event.type} | ID: ${event.id}`);
 
-        // 2) Manejo de eventos que nos importan
+        // ========================================
+        // 2) CHECKOUT.SESSION.COMPLETED
+        // ========================================
         if (event.type === "checkout.session.completed") {
             const session = event.data.object as Stripe.Checkout.Session;
-
-            // Extrae ids útiles
             const sessionId = session.id;
-            const stripeCustomerId =
-                typeof session.customer === "string" ? session.customer : (session.customer as any)?.id;
-            const hubspotContactIdFromStripe =
-                (session.metadata && (session.metadata as any).hubspot_contact_id) ||
-                session.client_reference_id ||
-                null;
 
-            // Recupera PI con expansiones para obtener latest_charge e invoice
-            const paymentIntentId =
-                typeof session.payment_intent === "string"
-                    ? session.payment_intent
-                    : (session.payment_intent as any)?.id;
+            console.log(`[WEBHOOK] Processing session: ${sessionId}`);
 
-            const pi = paymentIntentId
-                ? await stripe.paymentIntents.retrieve(paymentIntentId, {
-                    expand: ["latest_charge", "invoice"],
-                })
-                : null;
+            // Extraer datos básicos del session
+            const stripeCustomerId = typeof session.customer === "string"
+                ? session.customer
+                : session.customer?.id || null;
 
-            // chargeId y recibo
-            let chargeId: string | null = null;
-            let receiptUrl: string | null = null;
-            if (pi?.latest_charge) {
-                if (typeof pi.latest_charge === "string") {
-                    chargeId = pi.latest_charge;
-                    const ch = await stripe.charges.retrieve(chargeId);
-                    receiptUrl = ch.receipt_url ?? null;
-                } else {
-                    chargeId = pi.latest_charge.id;
-                    receiptUrl = pi.latest_charge.receipt_url ?? null;
+            const hubspotContactIdFromMetadata = session.metadata?.hubspot_contact_id
+                || session.client_reference_id
+                || null;
+
+            const email = session.customer_details?.email
+                || (session as any).customer_email
+                || null;
+
+            // Validación temprana
+            if (!email) {
+                console.error(`[WEBHOOK] No email found in session ${sessionId}`);
+                return NextResponse.json({
+                    received: true,
+                    warning: "No email in session"
+                }, { status: 200 });
+            }
+
+            // ========================================
+            // RESPUESTA RÁPIDA A STRIPE (< 3 segundos ideal)
+            // ========================================
+            const quickResponse = NextResponse.json({
+                received: true,
+                sessionId,
+                timestamp: new Date().toISOString()
+            });
+
+            // ========================================
+            // 3) PROCESAMIENTO ASÍNCRONO (después de responder)
+            // ========================================
+            const asyncTasks: Array<() => Promise<void>> = [];
+
+            // Tarea 1: Obtener PaymentIntent y actualizar HubSpot
+            asyncTasks.push(async () => {
+                console.log(`[WEBHOOK:ASYNC] Starting HubSpot update for ${sessionId}`);
+
+                try {
+                    // Obtener PaymentIntent con expansiones
+                    const paymentIntentId = typeof session.payment_intent === "string"
+                        ? session.payment_intent
+                        : session.payment_intent?.id || null;
+
+                    let chargeId: string | null = null;
+                    let receiptUrl: string | null = null;
+                    let invoiceId: string | null = null;
+                    let amount: number | null = null;
+                    let currency: string | null = null;
+
+                    if (paymentIntentId) {
+                        const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
+                            expand: ["latest_charge", "invoice"],
+                        }) as Stripe.Response<Stripe.PaymentIntent> & {
+                            latest_charge?: string | Stripe.Charge;
+                            invoice?: string | Stripe.Invoice;
+                        };
+
+                        // Extraer datos del PaymentIntent
+                        amount = pi.amount_received;
+                        currency = pi.currency;
+
+                        // Extraer Charge
+                        if (pi.latest_charge) {
+                            if (typeof pi.latest_charge === "string") {
+                                chargeId = pi.latest_charge;
+                                const charge = await stripe.charges.retrieve(chargeId);
+                                receiptUrl = charge.receipt_url;
+                            } else {
+                                chargeId = pi.latest_charge.id;
+                                receiptUrl = pi.latest_charge.receipt_url;
+                            }
+                        }
+
+                        // Extraer Invoice
+                        if (pi.invoice) {
+                            invoiceId = typeof pi.invoice === "string" ? pi.invoice : pi.invoice?.id || null;
+                        }
+                    }
+
+                    // Fallback a datos del session
+                    amount = amount ?? session.amount_total ?? null;
+                    currency = currency ?? session.currency ?? null;
+
+                    // Resolver contacto en HubSpot
+                    let targetContactId = hubspotContactIdFromMetadata;
+
+                    if (!targetContactId && email) {
+                        console.log(`[WEBHOOK:ASYNC] Finding contact by email: ${email}`);
+                        const found = await findContactByEmail(email);
+                        targetContactId = found?.id || null;
+                    }
+
+                    if (!targetContactId) {
+                        console.warn(`[WEBHOOK:ASYNC] No HubSpot contact found for ${email}`);
+                        return;
+                    }
+
+                    // Preparar campos para actualizar
+                    const paymentFields: Record<string, string> = {};
+
+                    if (sessionId) paymentFields.stripe_session_id = sessionId;
+                    if (paymentIntentId) paymentFields.stripe_payment_intent_id = paymentIntentId;
+                    if (chargeId) paymentFields.stripe_charge_id = chargeId;
+                    if (invoiceId) paymentFields.stripe_invoice_id = invoiceId;
+                    if (receiptUrl) paymentFields.stripe_receipt_url = receiptUrl;
+                    if (stripeCustomerId) paymentFields.stripe_customer_id = stripeCustomerId;
+                    if (amount !== null) paymentFields.stripe_amount = String(amount);
+                    if (currency) paymentFields.stripe_currency = currency;
+
+                    paymentFields.payment_status = "completed";
+                    paymentFields.last_payment_date = new Date().toISOString();
+
+                    // Actualizar HubSpot
+                    await updateHubspotContactPaymentFields(targetContactId, paymentFields);
+
+                    console.log(`[WEBHOOK:ASYNC] HubSpot updated successfully for contact: ${targetContactId}`);
+                } catch (err: any) {
+                    console.error(`[WEBHOOK:ASYNC] HubSpot update failed:`, err?.message || err);
+                    throw err;
                 }
-            }
+            });
 
-            const invoiceId =
-                typeof (pi as any)?.invoice === "string"
-                    ? ((pi as any).invoice as string)
-                    : (pi as any)?.invoice?.id || null;
+            // Tarea 2: Generar y enviar certificado
+            asyncTasks.push(async () => {
+                console.log(`[WEBHOOK:ASYNC] Starting certificate generation for ${sessionId}`);
 
-            const amount = (pi as Stripe.PaymentIntent | null)?.amount_received ?? session.amount_total ?? null; // centavos
-            const currency = (pi as Stripe.PaymentIntent | null)?.currency ?? session.currency ?? null;
+                try {
+                    if (!email) {
+                        console.warn("[WEBHOOK:ASYNC] No email, skipping certificate");
+                        return;
+                    }
 
-            // Resuelve el contacto (preferimos metadata; si no, por email)
-            let targetContactId = hubspotContactIdFromStripe as string | null;
-            let email =
-                session.customer_details?.email ||
-                (session as any).customer_email ||
-                undefined;
+                    // Obtener nombre del contacto
+                    const contact = await findContactByEmail(email);
+                    const fullName = contact
+                        ? `${contact.firstname || ""} ${contact.lastname || ""}`.trim()
+                        : "Miembro";
 
-            if (!targetContactId && email) {
-                const found = await findContactByEmail(email);
-                targetContactId = found?.id || null;
-            }
+                    if (!fullName || fullName === "Miembro") {
+                        console.warn(`[WEBHOOK:ASYNC] Using fallback name for ${email}`);
+                    }
 
-            // 3) Actualiza HubSpot con los datos del pago
-            const paymentFields: Record<string, string | undefined> = {
-                stripe_session_id: sessionId,
-                stripe_payment_intent_id: paymentIntentId || undefined,
-                stripe_charge_id: chargeId || undefined,
-                stripe_invoice_id: invoiceId || undefined,
-                stripe_receipt_url: receiptUrl || undefined,
-                stripe_customer_id: stripeCustomerId || undefined,
-                stripe_amount: amount != null ? String(amount) : undefined,
-                stripe_currency: currency || undefined,
-                payment_status: "completed",
-                last_payment_date: new Date().toISOString(),
-            };
-
-            if (targetContactId) {
-                await updateHubspotContactPaymentFields(targetContactId, paymentFields);
-                console.log("[WEBHOOK] HubSpot updated for contact:", targetContactId);
-            } else {
-                console.warn("[WEBHOOK] No HubSpot contactId resolved. Skipping HubSpot update.");
-            }
-
-            // 4) Enviar correo con PDF (si tienes esa lógica)
-            try {
-                if (email) {
-                    // Si quieres nombre real, puedes leerlo de HubSpot con findContactByEmail(email)
-                    const fullName = "Miembro"; // o recupera de HubSpot
-                    const baseUrl =
-                        process.env.NEXT_PUBLIC_DOMAIN ||
-                        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+                    // Generar PDF
+                    const baseUrl = process.env.NEXT_PUBLIC_DOMAIN
+                        || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
 
                     const pdf = await generateCertificateBuffer({
                         fullName,
-                        contactId: targetContactId ?? "N/A",
+                        contactId: contact?.id || "N/A",
                         sessionId,
                         offsetX: -70,
                         baseUrl,
                     });
 
-                    const id = await sendCertificateEmail({ to: email, fullName, pdf });
-                    console.log("[WEBHOOK] RESEND_MAIL_SENT", { id, to: email });
-                } else {
-                    console.warn("[WEBHOOK] No email in session; skipping email send.");
+                    // Enviar correo
+                    const emailId = await sendCertificateEmail({
+                        to: email,
+                        fullName,
+                        pdf
+                    });
+
+                    console.log(`[WEBHOOK:ASYNC] Certificate email sent successfully | ID: ${emailId} | To: ${email}`);
+                } catch (err: any) {
+                    console.error(`[WEBHOOK:ASYNC] Certificate generation/sending failed:`, err?.message || err);
+                    throw err;
                 }
-            } catch (e: any) {
-                console.error("[WEBHOOK] sendCertificateEmail error:", e?.message || e);
-            }
+            });
+
+            // Ejecutar tareas asíncronas SIN bloquear la respuesta
+            // Node.js continuará procesando después de enviar la respuesta
+            setImmediate(() => {
+                processAsyncTasks(asyncTasks).then(() => {
+                    const duration = Date.now() - startTime;
+                    console.log(`[WEBHOOK:ASYNC] All tasks completed in ${duration}ms for session ${sessionId}`);
+                });
+            });
+
+            return quickResponse;
         }
 
+        // ========================================
+        // 4) CHECKOUT.SESSION.EXPIRED
+        // ========================================
         if (event.type === "checkout.session.expired") {
             const session = event.data.object as Stripe.Checkout.Session;
+            const sessionId = session.id;
 
-            const hubspotContactIdFromStripe =
-                (session.metadata && (session.metadata as any).hubspot_contact_id) ||
-                session.client_reference_id ||
-                null;
+            console.log(`[WEBHOOK] Session expired: ${sessionId}`);
 
-            const email =
-                session.customer_details?.email ||
-                (session as any).customer_email ||
-                undefined;
+            const hubspotContactIdFromMetadata = session.metadata?.hubspot_contact_id
+                || session.client_reference_id
+                || null;
 
-            const updateProps: Record<string, string | undefined> = {
-                stripe_session_id: session.id,
-                payment_status: "failed",
-                last_payment_date: new Date().toISOString(),
-            };
+            const email = session.customer_details?.email
+                || (session as any).customer_email
+                || null;
 
-            let targetContactId = hubspotContactIdFromStripe as string | null;
-            if (!targetContactId && email) {
-                const c = await findContactByEmail(email);
-                targetContactId = c?.id || null;
-            }
+            // Respuesta rápida
+            const quickResponse = NextResponse.json({ received: true, sessionId });
 
-            if (targetContactId) {
-                await updateHubspotContactPaymentFields(targetContactId, updateProps);
-                console.log("[WEBHOOK] expired -> HubSpot updated:", targetContactId);
-            } else {
-                console.warn("[WEBHOOK] expired -> no contactId resolved");
-            }
+            // Actualización asíncrona
+            setImmediate(async () => {
+                try {
+                    let targetContactId = hubspotContactIdFromMetadata;
+
+                    if (!targetContactId && email) {
+                        const contact = await findContactByEmail(email);
+                        targetContactId = contact?.id || null;
+                    }
+
+                    if (targetContactId) {
+                        await updateHubspotContactPaymentFields(targetContactId, {
+                            stripe_session_id: sessionId,
+                            payment_status: "failed",
+                            last_payment_date: new Date().toISOString(),
+                        });
+                        console.log(`[WEBHOOK:ASYNC] Expired session updated in HubSpot: ${targetContactId}`);
+                    } else {
+                        console.warn(`[WEBHOOK:ASYNC] No contact found for expired session: ${sessionId}`);
+                    }
+                } catch (err: any) {
+                    console.error(`[WEBHOOK:ASYNC] Failed to update expired session:`, err?.message || err);
+                }
+            });
+
+            return quickResponse;
         }
 
+        // Otros eventos no manejados
+        console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
         return NextResponse.json({ received: true });
+
     } catch (error: any) {
-        console.error("[WEBHOOK] handler failed:", error?.message || error);
-        return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
+        const duration = Date.now() - startTime;
+        console.error(`[WEBHOOK] Handler failed after ${duration}ms:`, error?.message || error);
+        return NextResponse.json({
+            error: "Webhook handler failed",
+            details: process.env.NODE_ENV === "development" ? error?.message : undefined
+        }, { status: 500 });
     }
 }
