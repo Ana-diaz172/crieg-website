@@ -1,5 +1,5 @@
-import { Client } from '@hubspot/api-client';
-import { FilterOperatorEnum } from '@hubspot/api-client/lib/codegen/crm/contacts/models/Filter';
+import { Client } from "@hubspot/api-client";
+import { FilterOperatorEnum } from "@hubspot/api-client/lib/codegen/crm/contacts/models/Filter";
 
 const hubspotClient = new Client({
     accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
@@ -7,7 +7,7 @@ const hubspotClient = new Client({
 
 const omitUndefined = <T extends Record<string, any>>(obj: T): Record<string, string> =>
     Object.fromEntries(
-        Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== '')
+        Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== "")
     ) as Record<string, string>;
 
 export interface ContactData {
@@ -17,18 +17,20 @@ export interface ContactData {
     phone: string;
     membershipType: string;
     city: string;
-    professionalType: 'medico' | 'residente';
+    professionalType: "medico" | "residente";
     residencyLocation?: string;
     currentResidencyYear?: string;
     headProfessorName?: string;
 }
 
+/**
+ * Create or update a contact (dedupe by email) and return the contactId.
+ */
 export async function createOrUpdateContact(
     data: ContactData,
     stripeSessionId?: string
-) {
+): Promise<{ success: boolean; contactId?: string; error?: any }> {
     try {
-        // props para crear
         const contactProps: Record<string, string> = omitUndefined({
             firstname: data.firstName,
             lastname: data.lastName,
@@ -43,22 +45,23 @@ export async function createOrUpdateContact(
             stripe_session_id: stripeSessionId,
         });
 
-        const response = await hubspotClient.crm.contacts.basicApi.create({
+        // Try create
+        const created = await hubspotClient.crm.contacts.basicApi.create({
             properties: contactProps,
         });
 
-        return { success: true, contactId: response.id };
+        return { success: true, contactId: (created as any).id };
     } catch (error: any) {
-        // 409 = ya existe -> buscar y actualizar
         if (error.statusCode === 409) {
+            // Already exists -> search by email and update
             try {
                 const searchResponse = await hubspotClient.crm.contacts.searchApi.doSearch({
                     filterGroups: [
                         {
                             filters: [
                                 {
-                                    propertyName: 'email',
-                                    operator: FilterOperatorEnum.Eq, // ✅ enum, no string
+                                    propertyName: "email",
+                                    operator: FilterOperatorEnum.Eq,
                                     value: data.email,
                                 },
                             ],
@@ -70,7 +73,6 @@ export async function createOrUpdateContact(
                 if (searchResponse.results?.length > 0) {
                     const contactId = searchResponse.results[0].id;
 
-                    // props para actualizar (recrea el objeto en este scope)
                     const updateProps: Record<string, string> = omitUndefined({
                         firstname: data.firstName,
                         lastname: data.lastName,
@@ -92,70 +94,45 @@ export async function createOrUpdateContact(
                     return { success: true, contactId };
                 }
 
-                return { success: false, error: 'Contact not found after conflict' };
+                return { success: false, error: "Contact not found after conflict" };
             } catch (updateError) {
-                console.error('Error updating contact:', updateError);
+                console.error("Error updating contact:", updateError);
                 return { success: false, error: updateError };
             }
         }
 
-        console.error('Error creating contact:', error);
-        return { success: false, error: error.message || 'Unknown error' };
+        console.error("Error creating contact:", error);
+        return { success: false, error: error.message || "Unknown error" };
     }
 }
 
-export async function updateContactWithPaymentStatus(
-    email: string,
-    paymentStatus: 'completed' | 'failed',
-    stripeSessionId: string
+/**
+ * Update payment-related fields directly by HubSpot contactId.
+ * Create these properties in HubSpot as custom fields if they don't exist.
+ */
+export async function updateHubspotContactPaymentFields(
+    contactId: string,
+    props: Record<string, string | undefined>
 ) {
-    try {
-        const searchResponse = await hubspotClient.crm.contacts.searchApi.doSearch({
-            filterGroups: [
-                {
-                    filters: [
-                        {
-                            propertyName: 'email',
-                            operator: FilterOperatorEnum.Eq,
-                            value: email,
-                        },
-                    ],
-                },
-            ],
-            limit: 1,
-        });
+    const properties = Object.fromEntries(
+        Object.entries(props).filter(([, v]) => v !== undefined && v !== null && v !== "")
+    ) as Record<string, string>;
 
-        if (!searchResponse.results || searchResponse.results.length === 0) {
-            return { success: false, error: 'Contact not found' };
-        }
-
-        const contactId = searchResponse.results[0].id;
-
-        const props: Record<string, string> = omitUndefined({
-            payment_status: paymentStatus,
-            stripe_session_id: stripeSessionId,
-            last_payment_date:
-                paymentStatus === 'completed' ? new Date().toISOString() : undefined,
-        });
-
-        await hubspotClient.crm.contacts.basicApi.update(contactId, {
-            properties: props,
-        });
-
-        return { success: true, contactId };
-    } catch (error: any) {
-        console.error('Error updating payment status:', error);
-        return { success: false, error: error.message || 'Unknown error' };
-    }
+    await hubspotClient.crm.contacts.basicApi.update(contactId, {
+        properties,
+    });
 }
 
+/**
+ * Find a contact by email and return a lean object.
+ */
 export async function findContactByEmail(email: string) {
     const search = await hubspotClient.crm.contacts.searchApi.doSearch({
         filterGroups: [
             {
                 filters: [
                     {
-                        propertyName: 'email',
+                        propertyName: "email",
                         operator: FilterOperatorEnum.Eq,
                         value: email,
                     },
@@ -163,17 +140,33 @@ export async function findContactByEmail(email: string) {
             },
         ],
         limit: 1,
-        properties: ['firstname', 'lastname', 'email', 'payment_status', 'stripe_session_id'],
+        properties: [
+            "firstname",
+            "lastname",
+            "email",
+            "payment_status",
+            "stripe_session_id",
+            "stripe_payment_intent_id",
+            "stripe_charge_id",
+            "stripe_invoice_id",
+            "stripe_receipt_url",
+            "stripe_customer_id",
+        ],
     });
 
     if (!search.results?.length) return null;
     const c = search.results[0] as any;
     return {
         id: c.id,
-        firstname: c.properties?.firstname || '',
-        lastname: c.properties?.lastname || '',
-        email: c.properties?.email || '',
-        payment_status: c.properties?.payment_status || '',
-        stripe_session_id: c.properties?.stripe_session_id || '',
+        firstname: c.properties?.firstname || "",
+        lastname: c.properties?.lastname || "",
+        email: c.properties?.email || "",
+        payment_status: c.properties?.payment_status || "",
+        stripe_session_id: c.properties?.stripe_session_id || "",
+        stripe_payment_intent_id: c.properties?.stripe_payment_intent_id || "",
+        stripe_charge_id: c.properties?.stripe_charge_id || "",
+        stripe_invoice_id: c.properties?.stripe_invoice_id || "",
+        stripe_receipt_url: c.properties?.stripe_receipt_url || "",
+        stripe_customer_id: c.properties?.stripe_customer_id || "",
     };
 }
