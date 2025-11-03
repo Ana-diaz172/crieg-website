@@ -279,7 +279,7 @@ export async function updateHubspotContactPaymentFields(
 ) {
     const properties = omitUndefined(props as any);
 
-    console.log("[HUBSPOT] Updating payment fields for contact:", contactId);
+    console.log("[HUBSPOT]  Updating payment fields for contact:", contactId);
     console.log("[HUBSPOT] Payment properties:", Object.keys(properties));
 
     // Los campos de pago siempre se envían sin sanitización
