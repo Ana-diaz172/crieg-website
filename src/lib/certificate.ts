@@ -68,7 +68,7 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     let footerSize = 10;
 
     let footerText = `${contactId}`;
-    if (sessionId) footerText += `  |  Session: ${sessionId}`;
+    if (sessionId) footerText;
 
     const maxWidth = width - rightMargin - 24;
     let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);

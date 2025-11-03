@@ -76,19 +76,23 @@ export default function CheckoutPage() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (!membershipId) return;
 
+    document.cookie =
+      "hubspotutk=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+
     setLoading(true);
     setError("");
 
     try {
-      // Aquí podrías enviar primero los datos del formulario a tu backend
-      // const formResponse = await axios.post("/api/save-form-data", data);
+      const deleteCookie = (name: string) => {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${location.hostname}`;
+      };
 
-      console.log("Datos del formulario:", data);
+      ["hubspotutk", "__hssc", "__hssrc", "__hstc"].forEach(deleteCookie);
 
-      // Luego proceder con el checkout de Stripe
       const response = await axios.post("/api/create-checkout-session", {
         membershipId,
-        formData: data, // Puedes enviar los datos del formulario también
+        formData: data,
       });
 
       window.location.href = response.data.checkoutUrl;

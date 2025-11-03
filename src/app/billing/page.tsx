@@ -189,18 +189,7 @@ export default function BillingForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form data:", formData);
-    // Here you would typically send the data to your backend
   };
-
-  // Debug effect to log form data changes
-  useEffect(() => {
-    console.log("Form data updated:", formData);
-  }, [formData]);
-
-  // Debug effect to log step changes
-  useEffect(() => {
-    console.log("Current step:", currentStep);
-  }, [currentStep]);
 
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -463,117 +452,11 @@ export default function BillingForm() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white rounded-lg shadow-lg flex px-12 py-6 pt-30" >
-      {/* Left Sidebar */}
-      <div className="flex p-6 flex-col h-[100%] bg-[#FAFAFA] w-[420px] rounded-lg relative border">
-        <div className="relative h-[60px] w-[60px]">
-          <Image
-            src="/crieg-logo.png"
-            alt="Logo"
-            className="w-full h-full object-fit"
-            fill
-          />
-        </div>
-        <div className="mt-8">
-          <p className="font-semibold text-lg">Pasos para generar factura</p>
-          <p className="text-sm text-gray-500">
-            Complete todos los pasos que se piden para generar su factura
-          </p>
-        </div>
-        <div className="flex flex-col mt-10">
-          <div
-            className={`flex items-center gap-2 ${
-              currentStep >= 1 ? "opacity-100" : "opacity-50"
-            }`}
-          >
-            <div
-              className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
-                currentStep >= 1
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-500"
-              }`}
-            >
-              {currentStep > 1 ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <FileUser className="w-4 h-4" />
-              )}
-            </div>
-            <div className="flex flex-col">
-              <p className="text-sm font-semibold">Detalles del Cliente</p>
-              <p className="text-sm font-regular">
-                Completar datos del cliente.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center w-[36px]">
-            <div
-              className={`h-[32px] w-[2px] rounded-full ${
-                currentStep >= 2 ? "bg-blue-500" : "bg-gray-300"
-              }`}
-            />
-          </div>
-          <div
-            className={`flex items-center gap-2 ${
-              currentStep >= 2 ? "opacity-100" : "opacity-50"
-            }`}
-          >
-            <div
-              className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
-                currentStep >= 2
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-500"
-              }`}
-            >
-              {currentStep > 2 ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <FileText className="w-4 h-4" />
-              )}
-            </div>
-            <div className="flex flex-col">
-              <p className="text-sm font-semibold">Detalles de la Factura</p>
-              <p className="text-sm font-regular">
-                Completar datos de factura.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center justify-center w-[36px]">
-            <div
-              className={`h-[32px] w-[2px] rounded-full ${
-                currentStep >= 3 ? "bg-blue-500" : "bg-gray-300"
-              }`}
-            />
-          </div>
-          <div
-            className={`flex items-center gap-2 ${
-              currentStep >= 3 ? "opacity-100" : "opacity-50"
-            }`}
-          >
-            <div
-              className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
-                currentStep >= 3
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-500"
-              }`}
-            >
-              <FileCheck className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-sm font-semibold">Confirmación y Envío</p>
-              <p className="text-sm font-regular">
-                Revisar datos y enviar factura.
-              </p>
-            </div>
-          </div>
-        </div>
-        
-      </div>
-
-      {/* Right Content */}
-      <div className="w-[calc(100%-420px)] flex justify-center items-center">
-        <div className="flex flex-col w-full items-center max-w-[600px]">
-          <div className="relative h-[80px] w-[80px] mb-6">
+    <div className="w-full min-h-screen bg-white justify-center  rounded-lg shadow-lg flex px-12 py-6">
+      <div className="flex items-start w-full max-w-[900px] gap-4">
+        {/* Left Sidebar */}
+        <div className="flex p-6 flex-col bg-[#FAFAFA] h-[500px] w-[420px] rounded-lg relative border">
+          <div className="relative h-[60px] w-[60px]">
             <Image
               src="/crieg-logo.png"
               alt="Logo"
@@ -581,52 +464,151 @@ export default function BillingForm() {
               fill
             />
           </div>
+          <div className="mt-8">
+            <p className="font-semibold text-lg">Pasos para generar factura</p>
+            <p className="text-sm text-gray-500">
+              Complete todos los pasos que se piden para generar su factura
+            </p>
+          </div>
+          <div className="flex flex-col mt-10">
+            <div
+              className={`flex items-center gap-2 ${
+                currentStep >= 1 ? "opacity-100" : "opacity-50"
+              }`}
+            >
+              <div
+                className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
+                  currentStep >= 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-500"
+                }`}
+              >
+                {currentStep > 1 ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <FileUser className="w-4 h-4" />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold">Detalles del Cliente</p>
+                <p className="text-sm font-regular">
+                  Completar datos del cliente.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center w-[36px]">
+              <div
+                className={`h-[32px] w-[2px] rounded-full ${
+                  currentStep >= 2 ? "bg-blue-500" : "bg-gray-300"
+                }`}
+              />
+            </div>
+            <div
+              className={`flex items-center gap-2 ${
+                currentStep >= 2 ? "opacity-100" : "opacity-50"
+              }`}
+            >
+              <div
+                className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
+                  currentStep >= 2
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-500"
+                }`}
+              >
+                {currentStep > 2 ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <FileText className="w-4 h-4" />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold">Detalles de la Factura</p>
+                <p className="text-sm font-regular">
+                  Completar datos de factura.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center w-[36px]">
+              <div
+                className={`h-[32px] w-[2px] rounded-full ${
+                  currentStep >= 3 ? "bg-blue-500" : "bg-gray-300"
+                }`}
+              />
+            </div>
+            <div
+              className={`flex items-center gap-2 ${
+                currentStep >= 3 ? "opacity-100" : "opacity-50"
+              }`}
+            >
+              <div
+                className={`flex items-center justify-center border w-9 h-9 rounded-sm ${
+                  currentStep >= 3
+                    ? "bg-blue-500 text-white"
+                    : "bg-white text-gray-500"
+                }`}
+              >
+                <FileCheck className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col">
+                <p className="text-sm font-semibold">Confirmación y Envío</p>
+                <p className="text-sm font-regular">
+                  Revisar datos y enviar factura.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <Card className="w-full">
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit}>
-                {renderCurrentStep()}
+        {/* Right Content */}
+        <div className="w-full flex justify-center items-center">
+          <div className="flex flex-col w-full items-center max-w-[600px]">
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between mt-8">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Anterior
-                  </Button>
+            <Card className="w-full">
+              <CardContent className="pt-6">
+                <form onSubmit={handleSubmit}>
+                  {renderCurrentStep()}
 
-                  {currentStep < 3 ? (
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-between mt-8">
                     <Button
                       type="button"
-                      onClick={nextStep}
-                      disabled={
-                        (currentStep === 1 && !isStep1Valid()) ||
-                        (currentStep === 2 && !isStep2Valid())
-                      }
+                      variant="outline"
+                      onClick={prevStep}
+                      disabled={currentStep === 1}
                       className="flex items-center gap-2"
                     >
-                      Siguiente
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowLeft className="w-4 h-4" />
+                      Anterior
                     </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      disabled={!formData.email}
-                      className="flex items-center gap-2"
-                    >
-                      Generar Factura
-                      <FileCheck className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+
+                    {currentStep < 3 ? (
+                      <Button
+                        type="button"
+                        onClick={nextStep}
+                        disabled={
+                          (currentStep === 1 && !isStep1Valid()) ||
+                          (currentStep === 2 && !isStep2Valid())
+                        }
+                        className="flex items-center gap-2"
+                      >
+                        Siguiente
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        disabled={!formData.email}
+                        className="flex items-center gap-2"
+                      >
+                        Generar Factura
+                        <FileCheck className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
