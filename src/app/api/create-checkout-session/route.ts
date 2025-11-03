@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
             process.env.NEXT_PUBLIC_DOMAIN ||
             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-        // 2) Crea Customer en Stripe (corrigiendo tipos)
+        // 2) Crea Customer en Stripe
         const customerParams: Stripe.CustomerCreateParams = {
             email,
             name: fullName,
@@ -116,19 +116,10 @@ export async function POST(request: NextRequest) {
             }),
         };
 
-        let customer: Stripe.Response<Stripe.Customer>;
-        try {
-            customer = await stripe.customers.create(customerParams);
-            console.log("[CREATE_SESSION] Stripe customer:", customer.id);
-        } catch (err: any) {
-            console.error("[CREATE_SESSION] stripe.customers.create error:", err?.message || err);
-            return NextResponse.json(
-                { error: "Stripe customer creation failed", details: err?.message || String(err) },
-                { status: 500 }
-            );
-        }
+        const customer = await stripe.customers.create(customerParams);
+        console.log("[CREATE_SESSION] Stripe customer:", customer.id);
 
-        // 3) Crea la sesión de Checkout (corrigiendo tipos + metadata string)
+        // 3) Crea la sesión de Checkout + FACTURA
         const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: "payment",
             payment_method_types: ["card"],
@@ -143,6 +134,17 @@ export async function POST(request: NextRequest) {
                     quantity: 1,
                 },
             ],
+            // ⚠️ Clave para tener invoice_id disponible en el webhook:
+            invoice_creation: {
+                enabled: true,
+                invoice_data: {
+                    description: membership.name,
+                    metadata: toStripeMetadata({
+                        hubspot_contact_id: hubspotContactId,
+                        membershipId,
+                    }),
+                },
+            },
             success_url: `${domain}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domain}/`,
             client_reference_id: hubspotContactId,
@@ -153,17 +155,8 @@ export async function POST(request: NextRequest) {
             }),
         };
 
-        let session: Stripe.Response<Stripe.Checkout.Session>;
-        try {
-            session = await stripe.checkout.sessions.create(sessionParams);
-            console.log("[CREATE_SESSION] Stripe session:", session.id);
-        } catch (err: any) {
-            console.error("[CREATE_SESSION] stripe.checkout.sessions.create error:", err?.message || err);
-            return NextResponse.json(
-                { error: "Stripe session creation failed", details: err?.message || String(err) },
-                { status: 500 }
-            );
-        }
+        const session = await stripe.checkout.sessions.create(sessionParams);
+        console.log("[CREATE_SESSION] Stripe session:", session.id);
 
         return NextResponse.json({ checkoutUrl: session.url, sessionId: session.id });
     } catch (error: any) {

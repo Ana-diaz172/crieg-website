@@ -19,7 +19,7 @@ type PaymentExtract = {
     chargeId?: string | null;
     invoiceId?: string | null;
     receiptUrl?: string | null;
-    amount?: number | null;     // centavos
+    amount?: number | null; // centavos
     currency?: string | null;
     hubspotContactId?: string | null;
 };
@@ -29,7 +29,7 @@ function titleCaseName(raw: string): string {
     return raw
         .trim()
         .split(/\s+/)
-        .map(w => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
+        .map((w) => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ""))
         .join(" ");
 }
 
@@ -82,12 +82,18 @@ async function extractFromCheckoutSession(session: Stripe.Checkout.Session): Pro
                 : session.payment_intent?.id || null,
         amount: session.amount_total ?? null,
         currency: session.currency ?? null,
+        // ⬇️ Nuevo: toma el invoice directo de la Session si existe (invoice_creation.enabled)
+        invoiceId:
+            session.invoice
+                ? (typeof session.invoice === "string" ? session.invoice : session.invoice.id)
+                : null,
     };
 
+    // Expandimos PaymentIntent para completar datos de cargo, recibo e invoice (fallback / confirmación)
     if (out.paymentIntentId) {
-        const pi = await stripe.paymentIntents.retrieve(out.paymentIntentId, {
+        const pi = (await stripe.paymentIntents.retrieve(out.paymentIntentId, {
             expand: ["latest_charge", "invoice"],
-        }) as Stripe.PaymentIntent & {
+        })) as Stripe.PaymentIntent & {
             latest_charge?: string | Stripe.Charge;
             invoice?: string | Stripe.Invoice;
         };
@@ -106,7 +112,8 @@ async function extractFromCheckoutSession(session: Stripe.Checkout.Session): Pro
             }
         }
 
-        if (pi.invoice) {
+        // Si la Session no traía invoice, usa el del PI
+        if (!out.invoiceId && pi.invoice) {
             out.invoiceId = typeof pi.invoice === "string" ? pi.invoice : pi.invoice.id;
         }
     }
@@ -115,9 +122,9 @@ async function extractFromCheckoutSession(session: Stripe.Checkout.Session): Pro
 }
 
 async function extractFromPaymentIntent(pi: Stripe.PaymentIntent): Promise<PaymentExtract> {
-    const expanded = await stripe.paymentIntents.retrieve(pi.id, {
+    const expanded = (await stripe.paymentIntents.retrieve(pi.id, {
         expand: ["latest_charge", "invoice", "customer"],
-    }) as Stripe.PaymentIntent & {
+    })) as Stripe.PaymentIntent & {
         latest_charge?: string | Stripe.Charge;
         invoice?: string | Stripe.Invoice;
         customer?: string | Stripe.Customer;
@@ -127,6 +134,7 @@ async function extractFromPaymentIntent(pi: Stripe.PaymentIntent): Promise<Payme
         paymentIntentId: expanded.id,
         amount: expanded.amount_received ?? expanded.amount ?? null,
         currency: expanded.currency ?? null,
+        invoiceId: expanded.invoice ? (typeof expanded.invoice === "string" ? expanded.invoice : expanded.invoice.id) : null,
     };
 
     if (expanded.customer) {
@@ -157,10 +165,6 @@ async function extractFromPaymentIntent(pi: Stripe.PaymentIntent): Promise<Payme
         }
     }
 
-    if (expanded.invoice) {
-        out.invoiceId = typeof expanded.invoice === "string" ? expanded.invoice : expanded.invoice.id;
-    }
-
     return out;
 }
 
@@ -171,9 +175,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
     let hsFirst = "";
     let hsLast = "";
 
-    let foundContact:
-        | (Awaited<ReturnType<typeof findContactByEmail>>)
-        | null = null;
+    let foundContact: Awaited<ReturnType<typeof findContactByEmail>> | null = null;
 
     if (!targetContactId && ex.email) {
         foundContact = await findContactByEmail(ex.email);
@@ -186,11 +188,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
     if (foundContact) {
         hsFirst = foundContact.firstname || "";
         hsLast = foundContact.lastname || "";
-    }
-
-    if (!targetContactId) {
-        console.warn("[WEBHOOK] No HubSpot contact found. Skipping HS update.");
-        // Igual intentamos enviar el email con nombre derivado
     }
 
     // 2) Armar payload de pago (si hay contactId)
@@ -210,6 +207,8 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
         console.log("[HUBSPOT] Updating payment fields for contact:", targetContactId);
         console.log("[HUBSPOT] Payment properties:", paymentFields);
         await updateHubspotContactPaymentFields(targetContactId, paymentFields);
+    } else {
+        console.warn("[WEBHOOK] No HubSpot contact found. Skipping HS update.");
     }
 
     // 3) Enviar email con certificado si hay correo
@@ -237,13 +236,13 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
             to: ex.email,
             fullName,
             pdf,
-            invoiceId: ex.invoiceId ?? null,
+            invoiceId: ex.invoiceId ?? null, // <- va en el correo
             billingUrl: "https://crieg-website.vercel.app/billing",
         });
 
-
-
-        console.log(`[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email} | name: ${fullName}`);
+        console.log(
+            `[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email} | name: ${fullName} | invoice: ${ex.invoiceId ?? "N/A"}`
+        );
     } else {
         console.warn("[EMAIL] No email available; skipping email send.");
     }
@@ -273,7 +272,10 @@ export async function POST(request: NextRequest) {
         console.log(`[WEBHOOK] Event received: ${event.type} | ID: ${event.id}`);
 
         // 2) Manejo de eventos
-        if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+        if (
+            event.type === "checkout.session.completed" ||
+            event.type === "checkout.session.async_payment_succeeded"
+        ) {
             const session = event.data.object as Stripe.Checkout.Session;
             console.log("[WEBHOOK] Processing Checkout Session:", session.id);
 
