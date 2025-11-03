@@ -237,8 +237,10 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
             to: ex.email,
             fullName,
             pdf,
-            invoiceUrl: ex.invoiceId ? `https://dashboard.stripe.com/invoices/${ex.invoiceId}/pdf` : null
+            invoiceId: ex.invoiceId ?? null,
+            billingUrl: "https://crieg-website.vercel.app/billing",
         });
+
 
 
         console.log(`[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email} | name: ${fullName}`);
