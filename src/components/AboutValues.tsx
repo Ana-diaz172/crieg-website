@@ -67,12 +67,13 @@ export default function AboutHeroSection() {
                 {expanded === "education" && (
                   <div className="mt-4 text-gray-700 leading-relaxed">
                     <p>
-                      Ofrecemos eventos de educación médica continua
-                      <br />
-                      organizados y con valor ante el Consejo Mexicano
-                      <br />
-                      de Radiología e Imagen, promoviendo la certificación
-                      <br />y el mayor puntaje anual de recertificación.
+                      Ofrecemos eventos de educación médica continua{" "}
+                      <br className="hidden sm:inline" />
+                      organizados y con valor ante el Consejo Mexicano{" "}
+                      <br className="hidden sm:inline" />
+                      de Radiología e Imagen, promoviendo la certificación{" "}
+                      <br className="hidden sm:inline" />
+                      y el mayor puntaje anual de recertificación.
                     </p>
                   </div>
                 )}
@@ -97,10 +98,10 @@ export default function AboutHeroSection() {
                 {expanded === "collaboration" && (
                   <div className="mt-4 text-gray-700 leading-relaxed">
                     <p>
-                      Fomentamos la relación con otras organizaciones médicas
-                      <br />
-                      estatales, nacionales e internacionales, creando
-                      <br />
+                      Fomentamos la relación con otras organizaciones médicas{" "}
+                      <br className="hidden sm:inline"/>
+                      estatales, nacionales e internacionales, creando{" "}
+                      <br className="hidden sm:inline"/>
                       una red sólida de conocimiento e innovación médica.
                     </p>
                   </div>
@@ -126,10 +127,10 @@ export default function AboutHeroSection() {
                 {expanded === "research" && (
                   <div className="mt-4 text-gray-700 leading-relaxed">
                     <p>
-                      Estimulamos la investigación médica y involucramos
-                      <br />
-                      activamente a los médicos residentes en actividades
-                      <br />
+                      Estimulamos la investigación médica y involucramos{" "} 
+                      <br className="hidden sm:inline"/>
+                      activamente a los médicos residentes en actividades{" "}
+                      <br className="hidden sm:inline"/>
                       académicas especializadas en radiología e imagen.
                     </p>
                   </div>

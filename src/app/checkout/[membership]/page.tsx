@@ -13,9 +13,8 @@ interface Membership {
   description: string;
 }
 
-type MembershipId = "crieg-medicos" | "crieg-residentes" | "fmri";
+type MembershipId = "crieg-medicos" | "crieg-residentes" | "fmri" | "crieg-fmri";
 
-type MembershipType = "CRIEG" | "FMRI";
 type ProfessionalType = "medico" | "residente";
 
 interface FormData {
@@ -23,12 +22,12 @@ interface FormData {
   lastname: string;
   email: string;
   phone: string;
-  membership_type: MembershipType;
   city: string;
   professional_type: ProfessionalType;
   residency_location?: string;
   current_residency_year?: string;
   head_professor_name?: string;
+
 }
 
 const memberships: Record<MembershipId, Membership> = {
@@ -49,6 +48,12 @@ const memberships: Record<MembershipId, Membership> = {
     price: "$4,000",
     description:
       "Disfruta costos preferenciales en congresos y acceso a contenido académico exclusivo.",
+  },
+  "crieg-fmri": {
+    name: "Membresía CRIEG y FMRI",
+    price: "$6,600",
+    description:
+      "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
   },
 };
 
@@ -263,27 +268,6 @@ export default function CheckoutPage() {
                     {errors.phone && (
                       <p className="text-red-500 text-sm mt-1">
                         {errors.phone.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tipo de Inscripción *
-                    </label>
-                    <select
-                      {...register("membership_type", {
-                        required: "Este campo es obligatorio",
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                    >
-                      <option value="">Selecciona una opción</option>
-                      <option value="CRIEG">CRIEG</option>
-                      <option value="FMRI">FMRI</option>
-                    </select>
-                    {errors.membership_type && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.membership_type.message}
                       </p>
                     )}
                   </div>

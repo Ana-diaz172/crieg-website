@@ -26,7 +26,6 @@ export default function Footer() {
   ];
 
   const legalLinks = [
-    { label: "Términos y Condiciones", href: "#" },
     { label: "Política de Privacidad", href: "#" },
   ];
 

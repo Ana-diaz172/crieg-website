@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { twMerge } from "tailwind-merge";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -116,6 +117,10 @@ export default function Navbar() {
               </SheetTrigger>
 
               <SheetContent side="right" className="w-full sm:max-w-xs p-0">
+                <VisuallyHidden>
+                  <h2>Menú principal</h2>
+                </VisuallyHidden>
+
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 relative">

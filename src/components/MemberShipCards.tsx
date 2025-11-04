@@ -128,6 +128,20 @@ const memberships: Membership[] = [
       "Carta de pertenencia a la FMRI (expedida por la federación) para sumar puntajes.",
     ],
   },
+  {
+    id: "crieg-fmri",
+    title: "Membresía CRIEG y FMRI",
+    description:
+      "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
+    price: "$6,600",
+    priceSuffix: "/anual 2025",
+    priceAmount: 660000,
+    features: [
+      "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
+      "Acceso al Journal con contenido académico exclusivo.",
+      "Carta de pertenencia a la FMRI (expedida por la federación) para sumar puntajes.",
+    ],
+  },
 ];
 
 export default function MemberShipCards() {
@@ -141,7 +155,7 @@ export default function MemberShipCards() {
           Fortalece tu desarrollo profesional con el respaldo del CRIEG.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full px-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl w-full px-6">
         {memberships.map((m) => (
           <MembershipCard key={m.id} {...m} />
         ))}
