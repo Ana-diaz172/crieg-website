@@ -140,6 +140,7 @@ const memberships: Membership[] = [
       "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
       "Acceso al Journal con contenido académico exclusivo.",
       "Carta de pertenencia a la FMRI (expedida por la federación) para sumar puntajes.",
+      "Carta de pertenencia a CRIEG expedida por el Colegio."
     ],
   },
 ];

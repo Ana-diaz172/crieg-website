@@ -9,9 +9,8 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-green-100">
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-        {/* Left Content Section (unchanged) */}
+        {/* Left Content Section  */}
         <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">
           {/* Header */}
           <div className="mb-16">
@@ -31,10 +30,6 @@ export default function ContactPage() {
 
           {/* Contact Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
-            {/* Office */}
-
-
-            {/* Email */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
                 Email

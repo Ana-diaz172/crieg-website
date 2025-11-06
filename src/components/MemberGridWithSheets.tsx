@@ -298,6 +298,16 @@ export default function MemberGridWithSheets({
           </div>
         ))}
       </div>
+
+      <div className="mt-10 flex justify-center">
+        <a
+          href="/directors" 
+          className="inline-flex items-center gap-2 px-6 py-3 text-[#0B4B2B] border border-[#0B4B2B] rounded-lg font-medium hover:bg-[#0B4B2B] hover:text-white transition"
+        >
+          Ver más sobre la Mesa Directiva
+          <ArrowUpRight className="w-4 h-4" />
+        </a>
+      </div>
     </div>
   );
 }
