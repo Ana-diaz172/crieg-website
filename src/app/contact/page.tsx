@@ -3,6 +3,7 @@
 import { ArrowRight, Menu } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import ContactForm from "@/components/contact/ContactForm";
 
 export default function ContactPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,8 +29,10 @@ export default function ContactPage() {
             </p>
           </div>
 
+          <ContactForm />
+
           {/* Contact Information */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16 mt-10">
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
                 Email
@@ -60,17 +63,17 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Contact Form Card */}
             <a href="/membership">
-            <div className="bg-[#0B4B2B] text-white p-6 rounded-lg group cursor-pointer hover:bg-gray-800 transition-colors">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-300 mb-2">
-                    ¿Quieres formar parte?
-                  </p>
-                  <h3 className="text-xl font-light">Colegiarse</h3>
+              <div className="bg-[#0B4B2B] text-white p-6 rounded-lg group cursor-pointer hover:bg-gray-800 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-300 mb-2">
+                      ¿Quieres formar parte?
+                    </p>
+                    <h3 className="text-xl font-light">Colegiarse</h3>
+                  </div>
+                  <ArrowRight className="h-6 w-6 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </div>
-                <ArrowRight className="h-6 w-6 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
               </div>
-            </div>
             </a>
           </div>
         </div>
