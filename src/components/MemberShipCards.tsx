@@ -1,6 +1,6 @@
 "use client";
 
-import { BriefcaseMedical, Check } from "lucide-react";
+import { ArrowUpRight, BriefcaseMedical, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type Membership = {
@@ -143,7 +143,7 @@ const memberships: Membership[] = [
       "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
       "Regularización automática al pagar la cuota 2025.",
       "Carta de pertenencia a CRIEG expedida por el Colegio.",
-      "Carta de pertenencia a CRIEG expedida por el Colegio."
+      "Carta de pertenencia a CRIEG expedida por el Colegio.",
     ],
   },
 ];
@@ -163,6 +163,16 @@ export default function MemberShipCards() {
         {memberships.map((m) => (
           <MembershipCard key={m.id} {...m} />
         ))}
+      </div>
+
+      <div className="mt-10 flex justify-center">
+        <a
+          href="/members"
+          className="inline-flex items-center gap-2 px-6 py-3 text-[#0B4B2B] border border-[#0B4B2B] rounded-lg font-medium hover:bg-[#0B4B2B] hover:text-white transition"
+        >
+          Ver más sobre Miembros
+          <ArrowUpRight className="w-4 h-4" />
+        </a>
       </div>
     </div>
   );

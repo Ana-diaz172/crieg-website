@@ -66,7 +66,7 @@ export default function ContactForm() {
   return (
     // CAMBIO CLAVE: max-w-xl (aprox 512px) cambiado a max-w-3xl (aprox 768px)
     <div className="w-full p-6 bg-white shadow-lg rounded-xl border border-gray-100">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Envíanos un note</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Envíanos un mensaje</h2>
 
       {/* note de éxito visible después de un envío exitoso */}
       {isSubmitSuccessful && (

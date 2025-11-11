@@ -163,12 +163,23 @@ export default function Navbar() {
                           <Link
                             href="/contact"
                             className="block rounded-md px-3 py-2 text-gray-900 hover:bg-gray-100"
+                            
                           >
                             Contacto
                           </Link>
                         </SheetClose>
                       </li>
                       <li className="pt-2">
+                        <SheetClose asChild>
+                          <Link
+                            href="/certificates"
+                            className="block rounded-md px-3 py-2 text-gray-900 hover:bg-gray-100"
+                          >
+                            Constancias
+                          </Link>
+                        </SheetClose>
+                      </li>
+                      <li>
                         <SheetClose asChild>
                           <Link
                             href="/membership"

@@ -23,10 +23,14 @@ interface FormData {
   email: string;
   phone: string;
   city: string;
+  birth_date: string;
+  active_member: string;
+
   professional_type: ProfessionalType;
   residency_location?: string;
   current_residency_year?: string;
   head_professor_name?: string;
+
 
 }
 
@@ -287,6 +291,44 @@ export default function CheckoutPage() {
                     {errors.city && (
                       <p className="text-red-500 text-sm mt-1">
                         {errors.city.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fecha de nacimiento *
+                    </label>
+                    <input
+                      type="text"
+                      {...register("birth_date", {
+                        required: "Este campo es obligatorio",
+                      })}
+                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
+                      placeholder="DD/MM/AAAA"
+                    />
+                    {errors.birth_date && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.birth_date.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Constancia de miembro activo *
+                    </label>
+                    <input
+                      type="text"
+                      {...register("active_member", {
+                        required: "Este campo es obligatorio",
+                      })}
+                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
+                      placeholder="Ingresa tu constancia"
+                    />
+                    {errors.active_member && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.active_member.message}
                       </p>
                     )}
                   </div>
