@@ -88,6 +88,14 @@ export default function Navbar() {
                 </Link>
               </li>
               <li>
+                  <Link
+                    href="/certificates"
+                    className=" hover:text-[#a7c3b5] transition-colors"
+                  >
+                    Constancias
+                  </Link>
+              </li>
+              <li>
                 <Link
                   className="bg-[#0B4B2B] border border-[#07572f] px-6 py-3 rounded-full flex gap-1 cursor-pointer items-center text-base font-medium hover:bg-[#0D5C36] transition text-white"
                   href="/membership"
@@ -163,7 +171,6 @@ export default function Navbar() {
                           <Link
                             href="/contact"
                             className="block rounded-md px-3 py-2 text-gray-900 hover:bg-gray-100"
-                            
                           >
                             Contacto
                           </Link>
