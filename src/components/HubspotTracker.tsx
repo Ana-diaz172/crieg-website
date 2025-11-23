@@ -6,7 +6,7 @@ const BLOCKED = [
   /^\/membership(\/|$)/,
   /^\/checkout(\/|$)/,
   /^\/success$/,
-  /^\/billing$/,
+  /^\/invoice$/,
 ];
 
 export default function HubspotTracker() {

@@ -47,7 +47,7 @@ export default function HeroBanner() {
               <Link
                 className="border border-white px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
                 aria-label="Ir a Colegiarse"
-                href="/billing"
+                href="/invoice"
               >
                 Facturar
                 <ScrollText className="text-white size-5" />

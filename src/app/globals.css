@@ -124,3 +124,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+#chat-widget-launcher {
+  display: none;;
+}

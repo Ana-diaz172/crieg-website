@@ -17,7 +17,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const removeFixed = pathname === "/success" || pathname === "/billing";
+  const removeFixed = pathname === "/success" || pathname === "/invoice";
 
   useEffect(() => {
     // Asegura el valor correcto al montar (por si inicia scrolleado)
