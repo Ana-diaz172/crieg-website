@@ -1,37 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
-import Image from "next/image";
 import { useForm, SubmitHandler } from "react-hook-form";
+import Image from "next/image";
+import axios from "axios";
+
+import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormSchema, FormSchemaType } from "@/schema/checkoutSchema";
+import PersonalDataForm from "@/components/checkout/PersonalDataForm";
+import AcademicDataForm from "@/components/checkout/AcademicDataForm";
 
 // Types
-interface Membership {
-  name: string;
-  price: string;
-  description: string;
-}
+type MembershipId =
+  | "crieg-medicos"
+  | "crieg-residentes"
+  | "fmri"
+  | "crieg-fmri";
 
-type MembershipId = "crieg-medicos" | "crieg-residentes" | "fmri" | "crieg-fmri";
+export type ProfessionalType = "medico" | "residente";
 
-type ProfessionalType = "medico" | "residente";
-
-interface FormData {
+export interface FormData {
   firstname: string;
   lastname: string;
   email: string;
   phone: string;
   city: string;
-  birth_date: string;
+  date_of_birth: string;
   active_member: string;
+
+  university: string;
+  specialty: string;
+  sub_specialty: string;
+  professional_id: string;
+  specialty_prof_id: string;
+  sub_specialty_prof_id: string;
+  validity_period: string;
+  added_certification: string;
 
   professional_type: ProfessionalType;
   residency_location?: string;
   current_residency_year?: string;
   head_professor_name?: string;
+}
 
-
+interface Membership {
+  name: string;
+  price: string;
+  description: string;
 }
 
 const memberships: Record<MembershipId, Membership> = {
@@ -61,9 +78,35 @@ const memberships: Record<MembershipId, Membership> = {
   },
 };
 
+const personalFields: (keyof FormData)[] = [
+  "firstname",
+  "lastname",
+  "email",
+  "phone",
+  "city",
+  "date_of_birth",
+  "active_member",
+];
+
+const academicFields: (keyof FormData)[] = [
+  "university",
+  "specialty",
+  "sub_specialty",
+  "professional_id",
+  "specialty_prof_id",
+  "sub_specialty_prof_id",
+  "validity_period",
+  "added_certification",
+  "professional_type",
+  "residency_location",
+  "current_residency_year",
+  "head_professor_name",
+];
+
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [step, setStep] = useState(1);
   const params = useParams();
   const router = useRouter();
 
@@ -71,13 +114,17 @@ export default function CheckoutPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
+    trigger,
+    clearErrors,
     formState: { errors },
-  } = useForm<FormData>();
-
-  const professionalType = watch("professional_type");
+  } = useForm<FormSchemaType>({
+    resolver: zodResolver(FormSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
 
   const membershipId = params.membership as string;
-
   const membership = membershipId
     ? memberships[membershipId as MembershipId]
     : null;
@@ -85,8 +132,31 @@ export default function CheckoutPage() {
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     if (!membershipId) return;
 
-    document.cookie =
-      "hubspotutk=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+    const professionalType = watch("professional_type");
+    const step2Fields: (keyof FormData)[] = [
+      "university",
+      "specialty",
+      "sub_specialty",
+      "professional_id",
+      "specialty_prof_id",
+      "sub_specialty_prof_id",
+      "validity_period",
+      "added_certification",
+      "professional_type",
+    ];
+
+    if (professionalType === "residente") {
+      step2Fields.push(
+        "residency_location",
+        "current_residency_year",
+        "head_professor_name"
+      );
+    }
+
+    const isValid = await trigger(step2Fields);
+    if (!isValid) {
+      return; // No continuar si hay errores
+    }
 
     setLoading(true);
     setError("");
@@ -118,6 +188,31 @@ export default function CheckoutPage() {
     }
   }, [membership, router]);
 
+  const nextStep = async () => {
+    const fieldsToValidate: (keyof FormData)[] =
+      step === 1
+        ? [
+            "firstname",
+            "lastname",
+            "email",
+            "phone",
+            "city",
+            "date_of_birth",
+            "active_member",
+          ]
+        : [];
+
+    const valid = await trigger(fieldsToValidate);
+
+    if (valid) {
+      setStep((prev) => prev + 1);
+
+      setTimeout(() => {
+        clearErrors();
+      }, 0);
+    }
+  };
+
   if (!membership) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -142,10 +237,9 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-green-100">
       <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Left Content Section - Scrollable */}
+        {/* LEFT CONTENT SECTION */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-6 sm:px-12 lg:px-16 xl:px-24 py-12">
-            {/* Header */}
             <div className="mb-8 mt-24">
               <h1 className="text-3xl font-light leading-tight text-gray-900 mb-6">
                 Formato de recolección de datos Membresía CRIEG Y FMRI 2025
@@ -174,286 +268,76 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* Form */}
+            {/* FORM */}
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="bg-white shadow-md rounded-lg p-6"
             >
               <h2 className="text-2xl font-bold mb-6 text-center">
-                Formulario de Registro
+                {" "}
+                Formulario de Registro{" "}
               </h2>
 
-              {/* Información del Registro */}
-              <fieldset className="mb-6">
-                <legend className="text-xl font-semibold mb-6">
-                  Información del Registro
-                </legend>
-
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nombres *
-                      </label>
-                      <input
-                        type="text"
-                        {...register("firstname", {
-                          required: "Este campo es obligatorio",
-                        })}
-                        className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                        placeholder="Ingresa tus nombres"
-                      />
-                      {errors.firstname && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.firstname.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Apellidos *
-                      </label>
-                      <input
-                        type="text"
-                        {...register("lastname", {
-                          required: "Este campo es obligatorio",
-                        })}
-                        className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                        placeholder="Ingresa tus apellidos"
-                      />
-                      {errors.lastname && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.lastname.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Correo electrónico *
-                    </label>
-                    <input
-                      type="email"
-                      {...register("email", {
-                        required: "Este campo es obligatorio",
-                        pattern: {
-                          value: /^\S+@\S+$/i,
-                          message: "Correo inválido",
-                        },
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                      placeholder="ejemplo@correo.com"
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teléfono (WhatsApp) *
-                    </label>
-                    <input
-                      type="tel"
-                      {...register("phone", {
-                        required: "Este campo es obligatorio",
-                        pattern: {
-                          value: /^[0-9]{10}$/,
-                          message: "Ingresa un número válido de 10 dígitos",
-                        },
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                      placeholder="3312345678"
-                    />
-                    {errors.phone && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.phone.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ciudad *
-                    </label>
-                    <input
-                      type="text"
-                      {...register("city", {
-                        required: "Este campo es obligatorio",
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                      placeholder="Ingresa tu ciudad"
-                    />
-                    {errors.city && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.city.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fecha de nacimiento *
-                    </label>
-                    <input
-                      type="text"
-                      {...register("birth_date", {
-                        required: "Este campo es obligatorio",
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                      placeholder="DD/MM/AAAA"
-                    />
-                    {errors.birth_date && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.birth_date.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Constancia de miembro activo *
-                    </label>
-                    <input
-                      type="text"
-                      {...register("active_member", {
-                        required: "Este campo es obligatorio",
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                      placeholder="Ingresa tu constancia"
-                    />
-                    {errors.active_member && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.active_member.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Es médico o residente *
-                    </label>
-                    <select
-                      {...register("professional_type", {
-                        required: "Este campo es obligatorio",
-                      })}
-                      className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent"
-                    >
-                      <option value="">Selecciona una opción</option>
-                      <option value="medico">Médico</option>
-                      <option value="residente">Residente</option>
-                    </select>
-                    {errors.professional_type && (
-                      <p className="text-red-500 text-sm mt-1">
-                        {errors.professional_type.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Campos condicionales para Residentes */}
-                  {professionalType === "residente" && (
-                    <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h3 className="text-lg font-semibold text-[#0B4B2B] mb-4">
-                        Información de Residencia
-                      </h3>
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Sede de Residencia *
-                          </label>
-                          <input
-                            type="text"
-                            {...register("residency_location", {
-                              required:
-                                professionalType === "residente"
-                                  ? "Este campo es obligatorio para residentes"
-                                  : false,
-                            })}
-                            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent bg-white"
-                            placeholder="Ingresa la sede de residencia"
-                          />
-                          {errors.residency_location && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.residency_location.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Grado que cursa actualmente *
-                          </label>
-                          <input
-                            type="text"
-                            {...register("current_residency_year", {
-                              required:
-                                professionalType === "residente"
-                                  ? "Este campo es obligatorio para residentes"
-                                  : false,
-                            })}
-                            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent bg-white"
-                            placeholder="Ej: R1, R2, R3, R4"
-                          />
-                          {errors.current_residency_year && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.current_residency_year.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Nombre de su Profesor Titular *
-                          </label>
-                          <input
-                            type="text"
-                            {...register("head_professor_name", {
-                              required:
-                                professionalType === "residente"
-                                  ? "Este campo es obligatorio para residentes"
-                                  : false,
-                            })}
-                            className="w-full border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent bg-white"
-                            placeholder="Ingresa el nombre completo"
-                          />
-                          {errors.head_professor_name && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.head_professor_name.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+              {/* Step indicator */}
+              <div className="text-center mb-6">
+                <p className="text-sm text-gray-500">Paso {step} de 2</p>
+                <div className="h-2 bg-gray-200 rounded-full mt-2">
+                  <div
+                    className={`h-2 bg-[#0B4B2B] rounded-full transition-all duration-500 ${
+                      step === 1 ? "w-1/2" : "w-full"
+                    }`}
+                  />
                 </div>
-              </fieldset>
+              </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  onClick={() => router.push("/")}
-                  className="flex-1 cursor-pointer bg-gray-200 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-300 transition-colors font-medium"
-                >
-                  Volver a membresías
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-[#0B4B2B] cursor-pointer text-white py-3 px-4 rounded-md hover:bg-green-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  {loading ? "Procesando..." : "Proceder al pago"}
-                </button>
+              {step === 1 && (
+                <PersonalDataForm register={register} errors={errors} />
+              )}
+              {step === 2 && (
+                <AcademicDataForm
+                  register={register}
+                  errors={errors}
+                  watch={watch}
+                  setValue={setValue}
+                  trigger={trigger}
+                />
+              )}
+
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-8">
+                {step > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setStep(step - 1)}
+                  >
+                    Atrás
+                  </Button>
+                )}
+                {step < 2 ? (
+                  <Button
+                    type="button"
+                    className="flex-1 bg-[#0B4B2B] text-white hover:bg-green-800"
+                    onClick={nextStep}
+                  >
+                    Siguiente
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-[#0B4B2B] text-white hover:bg-green-800 disabled:bg-gray-400"
+                  >
+                    {loading ? "Procesando..." : "Proceder al pago"}
+                  </Button>
+                )}
               </div>
             </form>
           </div>
         </div>
 
-        {/* Right Image Section - Fixed */}
+        {/* RIGHT IMAGE SECTION */}
         <div className="hidden lg:block lg:w-1/2 xl:w-1/2 relative">
           <div className="sticky top-0 h-screen">
             <Image

@@ -24,9 +24,20 @@ type IncomingFormData = {
     lastname: string;
     email: string;
     phone: string;
-    membership_type: "CRIEG" | "FMRI";
     city: string;
     professional_type: "medico" | "residente";
+    date_of_birth: string,
+    active_member: string;
+
+    university: string;
+    specialty: string;
+    sub_specialty: string;
+    professional_id: string;
+    specialty_prof_id: string;
+    sub_specialty_prof_id: string;
+    validity_period: string;
+    added_certification: string;
+
     residency_location?: string;
     current_residency_year?: string;
     head_professor_name?: string;
@@ -73,19 +84,30 @@ export async function POST(request: NextRequest) {
         // 1) Asegura contacto en HubSpot y obtén contactId
         const contactRes = await createOrUpdateContact(
             {
-                firstName: formData.firstname,
-                lastName: formData.lastname,
+                firstname: formData.firstname,
+                lastname: formData.lastname,
                 email: formData.email,
                 phone: formData.phone,
-                membershipType: formData.membership_type,
                 city: formData.city,
-                professionalType: formData.professional_type,
-                residencyLocation: formData.residency_location,
-                currentResidencyYear: formData.current_residency_year,
-                headProfessorName: formData.head_professor_name,
-            },
-            undefined
+
+                date_of_birth: formData.date_of_birth,
+                active_member: formData.active_member,
+
+                university: formData.university,
+                specialty: formData.specialty,
+                sub_specialty: formData.sub_specialty,
+                professional_id: formData.professional_id,
+                specialty_prof_id: formData.specialty_prof_id,
+                sub_specialty_prof_id: formData.sub_specialty_prof_id,
+                validity_period: formData.validity_period,
+                added_certification: formData.added_certification,
+
+                residency_location: formData.residency_location,
+                current_residency_year: formData.current_residency_year,
+                head_professor_name: formData.head_professor_name,
+            }
         );
+
 
         if (!contactRes?.success || !contactRes?.contactId) {
             console.error("[CREATE_SESSION] HubSpot createOrUpdateContact failed:", contactRes);

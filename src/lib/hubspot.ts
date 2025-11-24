@@ -6,8 +6,8 @@ const hubspotClient = new Client({
 });
 
 // ⚙️ Si pones HS_CUSTOM_FIELDS=1 en tus envs (Vercel), el código enviará
-// las propiedades personalizadas `professional_type` y `membership_type`.
-// Si no, las filtrará (y `professional_type` lo mapea a `jobtitle`).
+// las propiedades personalizadas de membresía.
+// Si no, las filtrará automáticamente.
 const HS_CUSTOM_FIELDS = process.env.HS_CUSTOM_FIELDS === "1";
 
 const omitUndefined = <T extends Record<string, any>>(obj: T): Record<string, string> =>
@@ -29,30 +29,38 @@ const PAYMENT_FIELDS = [
     "last_payment_date",
 ];
 
-// Filtra props que no existen en el portal si HS_CUSTOM_FIELDS no está activo.
-// Además, mapea professional_type -> jobtitle cuando no se envían custom fields.
-// IMPORTANTE: NO filtra campos de pago (stripe_*, payment_status, etc)
+// Campos personalizados de membresía que requieren estar creados en HubSpot
+const MEMBERSHIP_CUSTOM_FIELDS = [
+    "date_of_birth",
+    "active_member",
+    "university",
+    "specialty",
+    "sub_specialty",
+    "professional_id",
+    "specialty_prof_id",
+    "sub_specialty_prof_id",
+    "validity_period",
+    "added_certification",
+    "residency_location",
+    "current_residency_year",
+    "head_professor_name",
+];
+
+// Filtra props personalizadas que no existen en el portal si HS_CUSTOM_FIELDS no está activo.
+// IMPORTANTE: NO filtra campos de pago (stripe_*, payment_status, etc) ni campos estándar de HubSpot
 function sanitizeContactProps(input: Record<string, string>): Record<string, string> {
     const base = { ...input };
 
     if (!HS_CUSTOM_FIELDS) {
-        // Quita props que no existen EXCEPTO campos de pago
+        // Quita props personalizadas que no existen EXCEPTO campos de pago
         Object.keys(base).forEach(key => {
-            // Mantener campos de pago
+            // Mantener campos de pago (siempre existen)
             if (PAYMENT_FIELDS.includes(key)) {
                 return;
             }
 
-            // Filtrar membership_type si no hay custom fields
-            if (key === "membership_type") {
-                delete base[key];
-            }
-
-            // Mapear professional_type -> jobtitle
-            if (key === "professional_type") {
-                if (base[key]) {
-                    base["jobtitle"] = base[key];
-                }
+            // Filtrar campos personalizados de membresía si no hay HS_CUSTOM_FIELDS
+            if (MEMBERSHIP_CUSTOM_FIELDS.includes(key)) {
                 delete base[key];
             }
         });
@@ -61,17 +69,29 @@ function sanitizeContactProps(input: Record<string, string>): Record<string, str
     return base;
 }
 
+// Tipo de datos que van a HubSpot (SIN professional_type)
 export interface ContactData {
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email: string;
     phone: string;
-    membershipType: string;
     city: string;
-    professionalType: "medico" | "residente";
-    residencyLocation?: string;
-    currentResidencyYear?: string;
-    headProfessorName?: string;
+    date_of_birth: string;
+    active_member: string;
+
+    university: string;
+    specialty: string;
+    sub_specialty: string;
+    professional_id: string;
+    specialty_prof_id: string;
+    sub_specialty_prof_id: string;
+    validity_period: string;
+    added_certification: string;
+
+    // Campos condicionales de residentes (SÍ se guardan en HubSpot cuando tienen valor)
+    residency_location?: string;
+    current_residency_year?: string;
+    head_professor_name?: string;
 }
 
 /**
@@ -96,6 +116,7 @@ export async function findContactByEmail(email: string) {
             "lastname",
             "email",
             "phone",
+            "city",
             // Campos de pago
             "payment_status",
             "stripe_session_id",
@@ -108,10 +129,17 @@ export async function findContactByEmail(email: string) {
             "stripe_currency",
             "last_payment_date",
             // Campos de membresía
-            "membership_type",
-            "professional_type",
-            "jobtitle",
-            "city",
+            "date_of_birth",
+            "active_member",
+            "university",
+            "specialty",
+            "sub_specialty",
+            "professional_id",
+            "specialty_prof_id",
+            "sub_specialty_prof_id",
+            "validity_period",
+            "added_certification",
+            // Campos de residentes
             "residency_location",
             "current_residency_year",
             "head_professor_name",
@@ -126,6 +154,8 @@ export async function findContactByEmail(email: string) {
         lastname: c.properties?.lastname || "",
         email: c.properties?.email || "",
         phone: c.properties?.phone || "",
+        city: c.properties?.city || "",
+        // Campos de pago
         payment_status: c.properties?.payment_status || "",
         stripe_session_id: c.properties?.stripe_session_id || "",
         stripe_payment_intent_id: c.properties?.stripe_payment_intent_id || "",
@@ -136,10 +166,18 @@ export async function findContactByEmail(email: string) {
         stripe_amount: c.properties?.stripe_amount || "",
         stripe_currency: c.properties?.stripe_currency || "",
         last_payment_date: c.properties?.last_payment_date || "",
-        membership_type: c.properties?.membership_type || "",
-        professional_type: c.properties?.professional_type || "",
-        jobtitle: c.properties?.jobtitle || "",
-        city: c.properties?.city || "",
+        // Campos de membresía
+        date_of_birth: c.properties?.date_of_birth || "",
+        active_member: c.properties?.active_member || "",
+        university: c.properties?.university || "",
+        specialty: c.properties?.specialty || "",
+        sub_specialty: c.properties?.sub_specialty || "",
+        professional_id: c.properties?.professional_id || "",
+        specialty_prof_id: c.properties?.specialty_prof_id || "",
+        sub_specialty_prof_id: c.properties?.sub_specialty_prof_id || "",
+        validity_period: c.properties?.validity_period || "",
+        added_certification: c.properties?.added_certification || "",
+        // Campos de residentes
         residency_location: c.properties?.residency_location || "",
         current_residency_year: c.properties?.current_residency_year || "",
         head_professor_name: c.properties?.head_professor_name || "",
@@ -156,18 +194,25 @@ export async function upsertContactByEmail(
 ): Promise<{ success: true; contactId: string } | { success: false; error: any }> {
     try {
         const baseProps: Record<string, string> = omitUndefined({
-            firstname: data.firstName,
-            lastname: data.lastName,
+            firstname: data.firstname,
+            lastname: data.lastname,
             email: data.email,
             phone: data.phone,
             city: data.city,
-            // Estas dos props pueden no existir en tu portal:
-            membership_type: data.membershipType,
-            professional_type: data.professionalType,
-            // Estas sí pueden existir tal cual si las creaste:
-            residency_location: data.residencyLocation,
-            current_residency_year: data.currentResidencyYear,
-            head_professor_name: data.headProfessorName,
+            date_of_birth: data.date_of_birth,
+            active_member: data.active_member,
+            university: data.university,
+            specialty: data.specialty,
+            sub_specialty: data.sub_specialty,
+            professional_id: data.professional_id,
+            specialty_prof_id: data.specialty_prof_id,
+            sub_specialty_prof_id: data.sub_specialty_prof_id,
+            validity_period: data.validity_period,
+            added_certification: data.added_certification,
+            // Campos de residentes (opcionales, solo se envían si tienen valor)
+            residency_location: data.residency_location,
+            current_residency_year: data.current_residency_year,
+            head_professor_name: data.head_professor_name,
         });
 
         const mergedProps = omitUndefined({
@@ -279,7 +324,7 @@ export async function updateHubspotContactPaymentFields(
 ) {
     const properties = omitUndefined(props as any);
 
-    console.log("[HUBSPOT]  Updating payment fields for contact:", contactId);
+    console.log("[HUBSPOT] Updating payment fields for contact:", contactId);
     console.log("[HUBSPOT] Payment properties:", Object.keys(properties));
 
     // Los campos de pago siempre se envían sin sanitización
