@@ -14,10 +14,81 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AlegraInvoiceFormProps {
   onSuccess?: (data: any) => void;
 }
+
+const TAX_REGIME_OPTIONS = [
+  { value: "601", label: "601 - General de Ley Personas Morales" },
+  { value: "603", label: "603 - Personas Morales con Fines no Lucrativos" },
+  { value: "605", label: "605 - Sueldos y Salarios e Ingresos Asimilados" },
+  {
+    value: "612",
+    label:
+      "612 - Personas Físicas con Actividades Empresariales y Profesionales",
+  },
+  { value: "626", label: "626 - Régimen Simplificado de Confianza" },
+];
+
+const CFDI_USE_OPTIONS = [
+  { value: "G01", label: "G01 - Adquisición de mercancías" },
+  { value: "G03", label: "G03 - Gastos en general" },
+  { value: "D01", label: "D01 - Honorarios médicos" },
+  {
+    value: "D02",
+    label: "D02 - Gastos médicos por incapacidad o discapacidad",
+  },
+  { value: "P01", label: "P01 - Por definir" },
+];
+
+// Formas de pago permitidas
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "credit-card", label: "Tarjeta de crédito" },
+  { value: "debit-card", label: "Tarjeta de débito" },
+];
+
+const MX_STATES = [
+  "Aguascalientes",
+  "Baja California",
+  "Baja California Sur",
+  "Campeche",
+  "Chiapas",
+  "Chihuahua",
+  "Ciudad de México",
+  "Coahuila",
+  "Colima",
+  "Durango",
+  "Estado de México",
+  "Guanajuato",
+  "Guerrero",
+  "Hidalgo",
+  "Jalisco",
+  "Michoacán",
+  "Morelos",
+  "Nayarit",
+  "Nuevo León",
+  "Oaxaca",
+  "Puebla",
+  "Querétaro",
+  "Quintana Roo",
+  "San Luis Potosí",
+  "Sinaloa",
+  "Sonora",
+  "Tabasco",
+  "Tamaulipas",
+  "Tlaxcala",
+  "Veracruz",
+  "Yucatán",
+  "Zacatecas",
+];
 
 export default function AlegraInvoiceForm({
   onSuccess,
@@ -36,8 +107,8 @@ export default function AlegraInvoiceForm({
     city: "",
     state: "",
     zipCode: "",
-    country: "México",
     purchaseId: "",
+    paymentMethod: "", // 👈 nuevo campo
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +132,9 @@ export default function AlegraInvoiceForm({
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/invoicing/alegra-invoice", {
+      console.log("📤 Enviando datos:", formData); // Debug
+
+      const res = await fetch("/api/invoicing/create-and-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,6 +143,7 @@ export default function AlegraInvoiceForm({
       });
 
       const data = await res.json();
+      console.log("📥 Respuesta del servidor:", data); // Debug
 
       if (!res.ok) {
         throw new Error(
@@ -82,6 +156,7 @@ export default function AlegraInvoiceForm({
       );
       if (onSuccess) onSuccess(data);
     } catch (error: any) {
+      console.error("❌ Error:", error); // Debug
       setErrorMessage(
         error.message || "Error inesperado al generar la factura."
       );
@@ -166,27 +241,47 @@ export default function AlegraInvoiceForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="taxRegime">Régimen fiscal</Label>
-                  <Input
-                    id="taxRegime"
-                    name="taxRegime"
+                  <Label>Régimen fiscal</Label>
+                  <Select
                     value={formData.taxRegime}
-                    onChange={handleChange}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, taxRegime: value }))
+                    }
                     required
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona tu régimen fiscal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TAX_REGIME_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="cfdiUse">Uso de CFDI</Label>
-                  <Input
-                    id="cfdiUse"
-                    name="cfdiUse"
-                    placeholder="G03, P01, etc."
+                  <Label>Uso de CFDI</Label>
+                  <Select
                     value={formData.cfdiUse}
-                    onChange={handleChange}
-                    className="uppercase"
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, cfdiUse: value }))
+                    }
                     required
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona el uso de CFDI" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CFDI_USE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </section>
@@ -221,7 +316,9 @@ export default function AlegraInvoiceForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="interiorNumber">No. interior</Label>
+                  <Label htmlFor="interiorNumber">
+                    No. interior (opcional)
+                  </Label>
                   <Input
                     id="interiorNumber"
                     name="interiorNumber"
@@ -264,14 +361,25 @@ export default function AlegraInvoiceForm({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="state">Estado</Label>
-                  <Input
-                    id="state"
-                    name="state"
+                  <Label>Estado</Label>
+                  <Select
                     value={formData.state}
-                    onChange={handleChange}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, state: value }))
+                    }
                     required
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona tu estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MX_STATES.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </section>
@@ -282,20 +390,45 @@ export default function AlegraInvoiceForm({
                 Información de compra
               </h2>
               <Separator className="mb-4" />
-              <div className="space-y-1.5">
-                <Label htmlFor="purchaseId">ID de compra (Stripe)</Label>
-                <Input
-                  id="purchaseId"
-                  name="purchaseId"
-                  value={formData.purchaseId}
-                  onChange={handleChange}
-                  placeholder="Ej: cs_test_a1B2C3..."
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Este ID viene en el correo de confirmación de compra que te
-                  enviamos.
-                </p>
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="purchaseId">ID de compra (Stripe)</Label>
+                  <Input
+                    id="purchaseId"
+                    name="purchaseId"
+                    value={formData.purchaseId}
+                    onChange={handleChange}
+                    placeholder="Ej: cs_test_a1B2C3..."
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Este ID viene en el correo de confirmación de compra que te
+                    enviamos.
+                  </p>
+                </div>
+
+                {/* Forma de pago */}
+                <div className="space-y-1.5">
+                  <Label>Forma de pago</Label>
+                  <Select
+                    value={formData.paymentMethod}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, paymentMethod: value }))
+                    }
+                    required
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecciona la forma de pago" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PAYMENT_METHOD_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </section>
 
@@ -314,11 +447,7 @@ export default function AlegraInvoiceForm({
           </CardContent>
 
           <CardFooter className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg"
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Generando factura..." : "Generar factura"}
             </Button>
           </CardFooter>

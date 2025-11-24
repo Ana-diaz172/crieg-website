@@ -6,6 +6,8 @@ const ALEGRA_API_TOKEN = process.env.ALEGRA_API_TOKEN!;
 const ALEGRA_DEFAULT_ITEM_ID = process.env.ALEGRA_DEFAULT_ITEM_ID;
 const ALEGRA_DEFAULT_TAX_ID = process.env.ALEGRA_DEFAULT_TAX_ID;
 
+const ALEGRA_BASE_URL = "https://api.alegra.com/api/v1";
+
 function getAlegraAuthHeader() {
     const base64 = Buffer.from(`${ALEGRA_EMAIL}:${ALEGRA_API_TOKEN}`).toString(
         "base64"
@@ -27,13 +29,57 @@ type InvoiceFormPayload = {
     city: string;
     state: string;
     zipCode: string;
-    country: string;
-    purchaseId: string; // Stripe ID
+    purchaseId: string;
+    paymentMethod: string; // credit-card | debit-card | ...
 };
+
+type HubspotStripeContact = {
+    stripe_amount?: string;
+    stripe_currency?: string;
+    stripe_invoice_id?: string;
+    stripe_payment_intent_id?: string;
+    stripe_session_id?: string;
+    last_payment_date?: string;
+};
+
+async function getStripeInfoFromHubspotByEmail(
+    email: string
+): Promise<HubspotStripeContact> {
+    const base =
+        process.env.NEXT_PUBLIC_DOMAIN ||
+        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+
+    if (!base) {
+        throw new Error(
+            "No se pudo resolver base URL para llamar a /api/debug/contact"
+        );
+    }
+
+    const url = `${base.replace(
+        /\/$/,
+        ""
+    )}/api/debug/contact?email=${encodeURIComponent(email)}`;
+
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+            `Error llamando a /api/debug/contact: ${res.status} - ${text}`
+        );
+    }
+
+    const json = await res.json();
+    if (!json.found || !json.contact) {
+        throw new Error("No se encontró contacto en HubSpot para ese email.");
+    }
+
+    return json.contact as HubspotStripeContact;
+}
 
 async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     const query = encodeURIComponent(payload.rfc || payload.email);
-    const listUrl = `https://api.alegra.com/api/v1/contacts?query=${query}`;
+    const listUrl = `${ALEGRA_BASE_URL}/contacts?query=${query}`;
 
     const listRes = await fetch(listUrl, {
         method: "GET",
@@ -56,20 +102,33 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     const addressLine = `${payload.street} ${payload.exteriorNumber}${payload.interiorNumber ? ` Int. ${payload.interiorNumber}` : ""
         }`;
 
+    const name = (payload.businessName || payload.fullName).trim();
+    const rfc = payload.rfc.trim();
+    const email = payload.email.trim();
+
     const createBody = {
-        name: payload.businessName || payload.fullName,
-        identification: payload.rfc,
-        email: payload.email,
+        name,
+        identification: rfc,
+        email,
         address: {
             address: addressLine,
             city: payload.city,
-            state: payload.state,
-            country: payload.country,
+            country: "M\u00e9xico",
+            department: payload.state,
             zipCode: payload.zipCode,
+        },
+        cfdi: {
+            use: payload.cfdiUse,
+            regime: payload.taxRegime,
         },
     };
 
-    const createRes = await fetch("https://api.alegra.com/api/v1/contacts", {
+    console.log(
+        "🛠️ PAYLOAD FINAL A ALEGRA (contact):",
+        JSON.stringify(createBody, null, 2)
+    );
+
+    const createRes = await fetch(`${ALEGRA_BASE_URL}/contacts`, {
         method: "POST",
         headers: {
             Authorization: getAlegraAuthHeader(),
@@ -80,6 +139,7 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
 
     if (!createRes.ok) {
         const errorText = await createRes.text();
+        console.error("❌ Error Respuesta Alegra (contact):", errorText);
         throw new Error(`Error creando contacto en Alegra: ${errorText}`);
     }
 
@@ -93,15 +153,29 @@ async function createSimpleAlegraInvoice(params: {
     currency: string;
     description: string;
     reference: string;
+    paymentMethod: string;
+    cfdiUse: string;
+    taxRegime: string;
 }) {
     const today = new Date().toISOString().slice(0, 10);
 
+    if (!ALEGRA_DEFAULT_ITEM_ID) {
+        throw new Error(
+            "Configuración incompleta: falta ALEGRA_DEFAULT_ITEM_ID en las variables de entorno."
+        );
+    }
+
+    const itemId = Number(ALEGRA_DEFAULT_ITEM_ID);
+    if (!Number.isFinite(itemId)) {
+        throw new Error(
+            `Configuración inválida: ALEGRA_DEFAULT_ITEM_ID ('${ALEGRA_DEFAULT_ITEM_ID}') no es un número.`
+        );
+    }
+
     const items = [
         {
-            ...(ALEGRA_DEFAULT_ITEM_ID
-                ? { id: Number(ALEGRA_DEFAULT_ITEM_ID) }
-                : { name: params.description || "Servicio" }),
-            price: params.amount,
+            id: itemId,                // 👈 siempre mandamos id del ítem existente
+            price: params.amount,      // precio real de la membresía (Stripe)
             quantity: 1,
             ...(ALEGRA_DEFAULT_TAX_ID
                 ? { tax: [{ id: Number(ALEGRA_DEFAULT_TAX_ID) }] }
@@ -109,20 +183,25 @@ async function createSimpleAlegraInvoice(params: {
         },
     ];
 
+    const accountNumber = "Stripe-0000";
+
     const body = {
         date: today,
         dueDate: today,
-        client: {
-            id: params.contactId,
-        },
+        client: { id: params.contactId },
         items,
-        currency: params.currency.toUpperCase(),
         reference: params.reference,
-        observations: "Factura generada automáticamente desde el portal.",
         status: "open",
+        paymentMethod: params.paymentMethod,
+        paymentType: "PUE",
+        accountNumber,
+        cfdiUse: params.cfdiUse,
+        regimeClient: params.taxRegime,
     };
 
-    const res = await fetch("https://api.alegra.com/api/v1/invoices", {
+    console.log("🧾 PAYLOAD FACTURA A ALEGRA:", JSON.stringify(body, null, 2));
+
+    const res = await fetch(`${ALEGRA_BASE_URL}/invoices`, {
         method: "POST",
         headers: {
             Authorization: getAlegraAuthHeader(),
@@ -134,8 +213,9 @@ async function createSimpleAlegraInvoice(params: {
     const data = await res.json();
 
     if (!res.ok) {
+        console.error("❌ Error Respuesta Alegra (invoice):", data);
         throw new Error(
-            `Error creando factura en Alegra: ${data?.message || JSON.stringify(data)
+            `Error creando factura en Alegra: ${(data as any)?.message || JSON.stringify(data)
             }`
         );
     }
@@ -147,10 +227,7 @@ export async function POST(req: Request) {
     try {
         if (!ALEGRA_EMAIL || !ALEGRA_API_TOKEN) {
             return NextResponse.json(
-                {
-                    error:
-                        "Faltan variables de entorno ALEGRA_EMAIL o ALEGRA_API_TOKEN.",
-                },
+                { error: "Faltan variables de entorno ALEGRA." },
                 { status: 500 }
             );
         }
@@ -171,18 +248,42 @@ export async function POST(req: Request) {
             city,
             state,
             zipCode,
-            country,
             purchaseId,
+            paymentMethod,
         } = body;
 
         if (!purchaseId || !email || !rfc || !businessName) {
             return NextResponse.json(
-                { error: "Faltan datos obligatorios para generar la factura." },
+                { error: "Faltan datos obligatorios." },
                 { status: 400 }
             );
         }
 
-        // 1) Contacto en Alegra
+        if (!paymentMethod) {
+            return NextResponse.json(
+                { error: "La forma de pago es obligatoria." },
+                { status: 400 }
+            );
+        }
+
+        const stripeInfo = await getStripeInfoFromHubspotByEmail(email);
+        const stripeAmountCents = Number(stripeInfo.stripe_amount ?? "0");
+
+        if (!Number.isFinite(stripeAmountCents) || stripeAmountCents <= 0) {
+            return NextResponse.json(
+                { error: "Monto inválido en HubSpot." },
+                { status: 400 }
+            );
+        }
+
+        const amount = stripeAmountCents / 100;
+        const currency =
+            (stripeInfo.stripe_currency || "mxn").toUpperCase() || "MXN";
+        const reference =
+            stripeInfo.stripe_invoice_id ||
+            stripeInfo.stripe_payment_intent_id ||
+            `Compra ${purchaseId}`;
+
         const contact = await findOrCreateAlegraContact({
             fullName,
             email,
@@ -197,27 +298,23 @@ export async function POST(req: Request) {
             city,
             state,
             zipCode,
-            country,
             purchaseId,
+            paymentMethod,
         });
-
-        // 2) Crear factura (monto fijo de prueba por ahora)
-        const amount = 1000; // TODO: luego lo cambiamos por monto real de Stripe
-        const currency = "MXN";
-        const description = "Servicio adquirido en plataforma";
-        const reference = `Compra ${purchaseId}`;
 
         const invoice = await createSimpleAlegraInvoice({
             contactId: contact.id,
             amount,
             currency,
-            description,
+            description: "Servicio adquirido en plataforma",
             reference,
+            paymentMethod,
+            cfdiUse,
+            taxRegime,
         });
 
         const invoiceNumber = invoice.number ?? String(invoice.id);
 
-        // 3) Mandar correo al usuario con los datos de la factura
         await sendInvoiceEmail({
             to: email,
             fullName,
@@ -228,20 +325,13 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json(
-            {
-                success: true,
-                invoiceId: invoice.id,
-                invoiceNumber,
-                contactId: contact.id,
-            },
+            { success: true, invoiceId: invoice.id, invoiceNumber },
             { status: 200 }
         );
     } catch (error: any) {
         console.error("Alegra invoice error:", error);
         return NextResponse.json(
-            {
-                error: error.message || "Error interno al generar la factura.",
-            },
+            { error: error.message || "Error interno." },
             { status: 500 }
         );
     }
