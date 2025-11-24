@@ -44,7 +44,7 @@ function MembershipCard({
       <p className="text-sm font-normal text-gray-500 mb-6">{description}</p>
 
       {hasMultiLineSuffix ? (
-        <div className="flex items-center mb-6">
+        <div className="flex mb-6 flex-col items-start">
           <p className="text-5xl font-semibold text-[#0B4B2B] m-0">{price}</p>
           <div className="flex flex-col justify-center leading-tight ml-1">
             {priceSuffixLines!.map((line, idx) => (
@@ -55,7 +55,7 @@ function MembershipCard({
           </div>
         </div>
       ) : (
-        <p className="text-5xl font-semibold text-[#0B4B2B] mb-6">
+        <p className="text-5xl flex flex-col font-semibold text-[#0B4B2B] mb-6">
           {price}
           {priceSuffix && (
             <span className="text-base font-normal text-gray-500">
