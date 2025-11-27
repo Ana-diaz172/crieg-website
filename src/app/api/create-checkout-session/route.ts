@@ -25,10 +25,9 @@ type IncomingFormData = {
     email: string;
     phone: string;
     city: string;
-    professional_type: "medico" | "residente";
-    date_of_birth: string,
-    active_member: string;
 
+    date_of_birth: string;
+    active_member: string;
     university: string;
     specialty: string;
     sub_specialty: string;
@@ -37,6 +36,8 @@ type IncomingFormData = {
     sub_specialty_prof_id: string;
     validity_period: string;
     added_certification: string;
+
+    professional_type: "medico" | "residente";
 
     residency_location?: string;
     current_residency_year?: string;
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
 
         const membershipId = parsed.membershipId;
         const formData = parsed.formData;
+
         if (!membershipId) return NextResponse.json({ error: "membershipId is required" }, { status: 400 });
         if (!formData?.email) return NextResponse.json({ error: "formData.email is required" }, { status: 400 });
 
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
 
         console.log("[CREATE_SESSION] Start:", { email: formData.email, membershipId });
 
-        // 1) Asegura contacto en HubSpot y obtén contactId
+        // 1) Asegura contacto en HubSpot
         const contactRes = await createOrUpdateContact(
             {
                 firstname: formData.firstname,
@@ -92,7 +94,6 @@ export async function POST(request: NextRequest) {
 
                 date_of_birth: formData.date_of_birth,
                 active_member: formData.active_member,
-
                 university: formData.university,
                 specialty: formData.specialty,
                 sub_specialty: formData.sub_specialty,
@@ -105,9 +106,9 @@ export async function POST(request: NextRequest) {
                 residency_location: formData.residency_location,
                 current_residency_year: formData.current_residency_year,
                 head_professor_name: formData.head_professor_name,
-            }
+            },
+            undefined
         );
-
 
         if (!contactRes?.success || !contactRes?.contactId) {
             console.error("[CREATE_SESSION] HubSpot createOrUpdateContact failed:", contactRes);
@@ -130,22 +131,33 @@ export async function POST(request: NextRequest) {
             (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
         // 2) Crea Customer en Stripe
-        const customerParams: Stripe.CustomerCreateParams = {
+        const customer = await stripe.customers.create({
             email,
             name: fullName,
             metadata: toStripeMetadata({
                 hubspot_contact_id: hubspotContactId,
-            }),
-        };
 
-        const customer = await stripe.customers.create(customerParams);
+                date_of_birth: formData.date_of_birth,
+                active_member: formData.active_member,
+                university: formData.university,
+                specialty: formData.specialty,
+                sub_specialty: formData.sub_specialty,
+                professional_id: formData.professional_id,
+                specialty_prof_id: formData.specialty_prof_id,
+                sub_specialty_prof_id: formData.sub_specialty_prof_id,
+                validity_period: formData.validity_period,
+                added_certification: formData.added_certification,
+            }),
+        });
+
         console.log("[CREATE_SESSION] Stripe customer:", customer.id);
 
         // 3) Crea la sesión de Checkout + FACTURA
-        const sessionParams: Stripe.Checkout.SessionCreateParams = {
+        const session = await stripe.checkout.sessions.create({
             mode: "payment",
             payment_method_types: ["card"],
             customer: customer.id,
+
             line_items: [
                 {
                     price_data: {
@@ -156,7 +168,7 @@ export async function POST(request: NextRequest) {
                     quantity: 1,
                 },
             ],
-            // ⚠️ Clave para tener invoice_id disponible en el webhook:
+
             invoice_creation: {
                 enabled: true,
                 invoice_data: {
@@ -164,20 +176,43 @@ export async function POST(request: NextRequest) {
                     metadata: toStripeMetadata({
                         hubspot_contact_id: hubspotContactId,
                         membershipId,
+
+                        date_of_birth: formData.date_of_birth,
+                        active_member: formData.active_member,
+                        university: formData.university,
+                        specialty: formData.specialty,
+                        sub_specialty: formData.sub_specialty,
+                        professional_id: formData.professional_id,
+                        specialty_prof_id: formData.specialty_prof_id,
+                        sub_specialty_prof_id: formData.sub_specialty_prof_id,
+                        validity_period: formData.validity_period,
+                        added_certification: formData.added_certification,
                     }),
                 },
             },
+
             success_url: `${domain}/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${domain}/`,
+
             client_reference_id: hubspotContactId,
+
             metadata: toStripeMetadata({
                 hubspot_contact_id: hubspotContactId,
                 membershipId,
-                professional_type: formData.professional_type ?? "",
-            }),
-        };
 
-        const session = await stripe.checkout.sessions.create(sessionParams);
+                date_of_birth: formData.date_of_birth,
+                active_member: formData.active_member,
+                university: formData.university,
+                specialty: formData.specialty,
+                sub_specialty: formData.sub_specialty,
+                professional_id: formData.professional_id,
+                specialty_prof_id: formData.specialty_prof_id,
+                sub_specialty_prof_id: formData.sub_specialty_prof_id,
+                validity_period: formData.validity_period,
+                added_certification: formData.added_certification,
+            }),
+        });
+
         console.log("[CREATE_SESSION] Stripe session:", session.id);
 
         return NextResponse.json({ checkoutUrl: session.url, sessionId: session.id });

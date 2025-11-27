@@ -1,3 +1,4 @@
+// app/api/webhooks/stripe/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { findContactByEmail, updateHubspotContactPaymentFields } from "@/lib/hubspot";
@@ -236,7 +237,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
             fullName,
             pdf,
             invoiceId: ex.invoiceId ?? null, // <- va en el correo
-            billingUrl: "https://crieg-website.vercel.app/invoice",
+            billingUrl: "https://crieg-website.vercel.app/billing",
         });
 
         console.log(
