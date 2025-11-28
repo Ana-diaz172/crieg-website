@@ -123,11 +123,6 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
         },
     };
 
-    console.log(
-        "🛠️ PAYLOAD FINAL A ALEGRA (contact):",
-        JSON.stringify(createBody, null, 2)
-    );
-
     const createRes = await fetch(`${ALEGRA_BASE_URL}/contacts`, {
         method: "POST",
         headers: {
@@ -174,8 +169,8 @@ async function createSimpleAlegraInvoice(params: {
 
     const items = [
         {
-            id: itemId,                // 👈 siempre mandamos id del ítem existente
-            price: params.amount,      // precio real de la membresía (Stripe)
+            id: itemId, 
+            price: params.amount,
             quantity: 1,
             ...(ALEGRA_DEFAULT_TAX_ID
                 ? { tax: [{ id: Number(ALEGRA_DEFAULT_TAX_ID) }] }
@@ -198,8 +193,6 @@ async function createSimpleAlegraInvoice(params: {
         cfdiUse: params.cfdiUse,
         regimeClient: params.taxRegime,
     };
-
-    console.log("🧾 PAYLOAD FACTURA A ALEGRA:", JSON.stringify(body, null, 2));
 
     const res = await fetch(`${ALEGRA_BASE_URL}/invoices`, {
         method: "POST",

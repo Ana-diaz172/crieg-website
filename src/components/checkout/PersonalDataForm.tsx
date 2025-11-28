@@ -3,11 +3,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
-import { FormData } from "@/app/checkout/[membership]/page";
+import { CheckoutFormData } from "@/interface/checkout";
 
 interface PersonalDataFormProps {
-  register: UseFormRegister<FormData>;
-  errors: FieldErrors<FormData>;
+  register: UseFormRegister<CheckoutFormData>;
+  errors: FieldErrors<CheckoutFormData>;
 }
 
 export default function PersonalDataForm({

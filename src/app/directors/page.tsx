@@ -1,23 +1,17 @@
 import Image from "next/image";
 
-export default function BoardOfDirectors() {
-  const EstatutosSeccion1 = (
+function BoardStatutesSectionOne() {
+  return (
     <div className="max-w-4xl mx-auto text-gray-700 leading-relaxed space-y-6">
       <h2 className="text-3xl font-light text-gray-900 mb-6 border-b pb-2">
         Mesa Directiva
       </h2>
 
-      <ul
-        className="list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800"
-        style={{ listStyleType: "lower-alpha" }}
-      >
+      <ul className="list-[lower-alpha] list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800">
         {/* Definición */}
         <li>
           <span className="font-semibold text-gray-800">Definición.</span>
-          <ul
-            className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-            style={{ listStyleType: "lower-roman" }}
-          >
+          <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
             <li>
               Es la representación legal y administrativa del Colegio de
               Radiología e Imagen del Estado de Guanajuato A. C., estará formada
@@ -30,10 +24,7 @@ export default function BoardOfDirectors() {
         {/* Funciones */}
         <li>
           <span className="font-semibold text-gray-800">Funciones.</span>
-          <ul
-            className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-            style={{ listStyleType: "lower-roman" }}
-          >
+          <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
             <li>
               Generar acciones que den satisfacción a la misión, visión y
               objetivos del Colegio de Radiología e Imagen del Estado de
@@ -47,10 +38,7 @@ export default function BoardOfDirectors() {
           <span className="font-semibold text-gray-800">
             Capacidades de la Mesa Directiva.
           </span>
-          <ul
-            className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-            style={{ listStyleType: "lower-roman" }}
-          >
+          <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
             <li>
               Comprar y/o arrendar equipo de oficina, equipo de cómputo, equipo
               electrónico, equipo de telecomunicaciones o bienes inmuebles si
@@ -64,15 +52,12 @@ export default function BoardOfDirectors() {
           </ul>
         </li>
 
-        {/*  Facultades de la Mesa Directiva */}
+        {/* Facultades de la Mesa Directiva */}
         <li>
           <span className="font-semibold text-gray-800">
             Facultades de la Mesa Directiva.
           </span>
-          <ul
-            className="list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700"
-            style={{ listStyleType: "lower-roman" }}
-          >
+          <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700">
             <li>
               La Mesa Directiva gozará de las facultades que a continuación se
               mencionan, las que serán ejercidas a través de su Presidente,
@@ -101,10 +86,7 @@ export default function BoardOfDirectors() {
                 Directiva:
               </p>
               {/* Sub-lista para las facultades detalladas */}
-              <ul
-                className="list-outside ml-6 mt-2 space-y-3 marker:font-normal marker:text-gray-700"
-                style={{ listStyleType: "lower-alpha" }}
-              >
+              <ul className="list-[lower-alpha] list-outside ml-6 mt-2 space-y-3 marker:font-normal marker:text-gray-700">
                 <li>
                   Para iniciar, continuar, transigir, contestar o desistirse en
                   cualquier clase de juicio, trámite o diligencias ya sean
@@ -206,8 +188,10 @@ export default function BoardOfDirectors() {
       </ul>
     </div>
   );
+}
 
-  const EstatutosSeccion2 = (
+function BoardStatutesSectionTwo() {
+  return (
     <div className="max-w-4xl mx-auto text-gray-700 leading-relaxed space-y-6 mt-10">
       <h2 className="text-3xl font-light text-gray-900 mb-6 border-b pb-2">
         Proceso Electoral y Sucesión
@@ -218,21 +202,15 @@ export default function BoardOfDirectors() {
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Nombramiento y elección de Presidente.
         </h3>
-        <ul
-          className="list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800"
-          style={{ listStyleType: "lower-alpha" }}
-        >
+        <ul className="list-[lower-alpha] list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800">
           <li>
             <span className="font-semibold text-gray-800">
               Proceso de elección:
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700">
               <li>
                 Convocatoria a candidatos.
-                <ul className="list-decimal list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700 ">
+                <ul className="list-decimal list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
                   <li>
                     1. Se publicará la convocatoria para el proceso de elección
                     en la orden del día de la Asamblea al menos dos meses
@@ -276,10 +254,7 @@ export default function BoardOfDirectors() {
             <span className="font-semibold text-gray-800">
               Requisitos de los electores.
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
               <li>
                 Ser miembro activo o miembro honorario del Colegio de Radiología
                 e Imagen del Estado de Guanajuato A.C. y formar parte de la
@@ -292,10 +267,7 @@ export default function BoardOfDirectors() {
             <span className="font-semibold text-gray-800">
               Criterios de elección.
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
               <li>
                 Se elegirá a un miembro escrutador quien contará los votos.
               </li>
@@ -315,10 +287,7 @@ export default function BoardOfDirectors() {
             <span className="font-semibold text-gray-800">
               El candidato elegido.
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
               <li>
                 El candidato elegido tendrá el nombramiento de Vicepresidente y
                 Presidente-Electo por un periodo de dos años. Al término del
@@ -330,30 +299,24 @@ export default function BoardOfDirectors() {
         </ul>
       </div>
 
-      {/*  Nombramiento de Secretario General y Tesorero */}
+      {/* Nombramiento de Secretario General y Tesorero */}
       <div className="pt-8">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Nombramiento de Secretario General y Tesorero.
         </h3>
-        <ul
-          className="list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800"
-          style={{ listStyleType: "lower-alpha" }}
-        >
+        <ul className="list-[lower-alpha] list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800">
           <li>
             <span className="font-semibold text-gray-800">
               Proceso de elección:
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700">
               <li>
                 Convocatoria a candidatos.
                 <ul className="list-decimal list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
                   <li>
-                    1. Se publicará la convocatoria para el proceso de elección en
-                    la orden del día de la Asamblea al menos dos meses previos a
-                    la fecha de la votación.
+                    1. Se publicará la convocatoria para el proceso de elección
+                    en la orden del día de la Asamblea al menos dos meses
+                    previos a la fecha de la votación.
                   </li>
                   <li>
                     2. La Mesa Directiva registrará a los miembros interesados y
@@ -370,26 +333,26 @@ export default function BoardOfDirectors() {
                     Radiología e Imagen del Estado de Guanajuato A.C.
                   </li>
                   <li>
-                    2. No haber tenido cargo de Secretario General del Colegio de
+                    2. No haber tenido cargo de Secretario General del Colegio
+                    de Radiología e Imagen del Estado de Guanajuato A.C. al
+                    menos un periodo de 2 años previos a la fecha de elección
+                    para aspirar al puesto de Secretario General.
+                  </li>
+                  <li>
+                    3. No haber tenido cargo de Tesorero del Colegio de
                     Radiología e Imagen del Estado de Guanajuato A.C. al menos
                     un periodo de 2 años previos a la fecha de elección para
-                    aspirar al puesto de Secretario General.
+                    aspirar al puesto de Tesorero.
                   </li>
                   <li>
-                    3. No haber tenido cargo de Tesorero del Colegio de Radiología
-                    e Imagen del Estado de Guanajuato A.C. al menos un periodo
-                    de 2 años previos a la fecha de elección para aspirar al
-                    puesto de Tesorero.
+                    4. El Secretario General actual podrá ser elegido para un
+                    cargo diferente al de Secretario General en la Mesa
+                    Directiva del periodo inmediato siguiente.
                   </li>
                   <li>
-                    4. El Secretario General actual podrá ser elegido para un cargo
-                    diferente al de Secretario General en la Mesa Directiva del
-                    periodo inmediato siguiente.
-                  </li>
-                  <li>
-                    5. El Tesorero actual podrá ser elegido para un cargo diferente
-                    al de Tesorero en la Mesa Directiva del periodo inmediato
-                    siguiente.
+                    5. El Tesorero actual podrá ser elegido para un cargo
+                    diferente al de Tesorero en la Mesa Directiva del periodo
+                    inmediato siguiente.
                   </li>
                 </ul>
               </li>
@@ -411,10 +374,7 @@ export default function BoardOfDirectors() {
             <span className="font-semibold text-gray-800">
               Requisitos de los electores.
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
               <li>
                 Ser miembro activo o miembro honorario del Colegio de Radiología
                 e Imagen del estado de Guanajuato A.C y formar parte de la
@@ -427,10 +387,7 @@ export default function BoardOfDirectors() {
             <span className="font-semibold text-gray-800">
               Criterios de elección.
             </span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-1 marker:font-normal marker:text-gray-700">
               <li>
                 Una votación entre dos candidatos se definirá con la mayoría
                 absoluta, es decir, con más de la mitad de los votos.
@@ -450,10 +407,7 @@ export default function BoardOfDirectors() {
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Ausencia de un Miembro de la Mesa Directiva.
         </h3>
-        <ul
-          className="list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800"
-          style={{ listStyleType: "lower-alpha" }}
-        >
+        <ul className="list-[lower-alpha] list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800">
           <li>
             <span className="font-semibold text-gray-800">
               Cualquier miembro de la Mesa Directiva puede dejar su cargo por
@@ -465,10 +419,7 @@ export default function BoardOfDirectors() {
 
           <li>
             <span className="font-semibold text-gray-800">Actuación.</span>
-            <ul
-              className="list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700"
-              style={{ listStyleType: "lower-roman" }}
-            >
+            <ul className="list-[lower-roman] list-outside ml-6 mt-1 space-y-2 marker:font-normal marker:text-gray-700">
               <li>
                 En caso de que el presidente deje su cargo el Vicepresidente
                 tomará su puesto. Este nombramiento terminará el periodo de 2
@@ -501,10 +452,7 @@ export default function BoardOfDirectors() {
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           Entrega Recepción de una Mesa Directiva a otra.
         </h3>
-        <ul
-          className="list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800"
-          style={{ listStyleType: "lower-alpha" }}
-        >
+        <ul className="list-[lower-alpha] list-outside ml-6 space-y-4 marker:font-semibold marker:text-gray-800">
           <li>
             <span>
               La Mesa Directiva saliente deberá entregar a la Mesa Directiva
@@ -526,25 +474,25 @@ export default function BoardOfDirectors() {
       </div>
     </div>
   );
+}
 
+export default function BoardOfDirectors() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <div className="relative w-full h-[30vh] md:h-[30vh] overflow-hidden">
         <Image
           src="/about-banner-page.jpg"
           alt="Equipo médico de radiología trabajando en conjunto"
-          layout="fill"
-          objectFit="cover"
+          fill
+          className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-black/20" />
       </div>
 
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
-        {EstatutosSeccion1}
-
-
-        {EstatutosSeccion2}
+        <BoardStatutesSectionOne />
+        <BoardStatutesSectionTwo />
       </div>
     </div>
   );

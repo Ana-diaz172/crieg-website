@@ -9,98 +9,14 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-
-type InfoCard = {
-  id: string;
-  title: string;
-  description: string;
-  rights: string[];
-  obligations: string[];
-};
-
-function InfoCard({
-  title,
-  description,
-  onClick,
-}: InfoCard & { onClick: () => void }) {
-  return (
-    <div
-      onClick={onClick}
-      className="border rounded-xl shadow-sm p-6 flex flex-col bg-white cursor-pointer hover:shadow-md transition-all hover:-translate-y-1 text-center min-h-[280px] justify-between"
-    >
-      <div>
-        <h3
-          className="text-2xl font-semibold text-[#0B4B2B] mb-3"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
-        <p className="text-sm font-normal text-gray-500">{description}</p>
-      </div>
-      <div className="mt-4 text-sm text-[#0B4B2B] font-medium">
-        <span>Ver más</span>
-      </div>
-    </div>
-  );
-}
-
-const infoCards: InfoCard[] = [
-  {
-    id: "active_member",
-    title: "Miembro Activo",
-    description:
-      "Médico Radiólogo con cédula de especialista que ha cubierto el pago de la anualidad del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-    rights: [
-      "Tiene derecho a los beneficios de pertenecer al Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Al voto y opinión en las asambleas tanto ordinarias como extraordinarias del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "A postularse para cualquier cargo en la Mesa Directiva del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Difusión de actividades y logros profesionales.",
-      "Tiene derecho a realizar el pago de membresía anual a la Federación Mexicana de Radiología e Imagen.",
-      "A postularse para cualquier cargo en la Mesa Directiva de laFederación Mexicana de Radiología e Imagen.",
-    ],
-    obligations: [
-      "Realizar su pago anual de membresía al Colegio de Radiología e Imagen del Estado de Guanajuato.",
-      "Acudir y participar en cada asamblea tanto ordinaria como extraordinaria",
-      "Participar en cada actividad académica del Colegio de Radiología e Imagen del Estado de Guanajuato A. C.",
-    ],
-  },
-  {
-    id: "transitory_member",
-    title: "Miembro Transitorio",
-    description:
-      "Médico Residente de Radiología Diagnóstica y Terapéutica o Médico Residente en Curso de Subespecialidad o Médico Residente en Curso de Alta Especialidad que ha cubierto el pago de la anualidad del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-    rights: [
-      "Tiene derecho a los beneficios de pertenecer al Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Tiene derecho a realizar el pago de membresía anual a la Federación Mexicana de Radiología e Imagen.",
-    ],
-    obligations: [
-      "Realizar su pago anual de membresía al Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Participar en cada actividad académica del Colegio de Radiología del Estado de Guanajuato A. C.",
-    ],
-  },
-  {
-    id: "honorary_member",
-    title: "Miembro Honorario",
-    description:
-      "Médico Radiólogo que ha formado parte del Colegio de Radiología e Imagen del Estado de Guanajuato A.C. por 25 años o más.",
-    rights: [
-      "Tiene derecho a los beneficios de pertenecer al Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Al voto y opinión en las asambleas tanto ordinarias como extraordinarias del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "A postularse para cualquier cargo en la Mesa Directiva del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-      "Tiene derecho a hacer el pago de membresía anual a la Federación Mexicana de Radiología e Imagen.",
-      "A postularse para cualquier cargo en la Mesa Directiva de la Federación Mexicana de Radiología e Imagen.",
-      "El miembro honorario adquiere el derecho a no realizar pago anual para pertenecer al Colegio de Radiología e Imagen del Estado de Guanajuato A. C.",
-    ],
-    obligations: [
-      "Acudir y participar en cada asamblea tanto ordinaria como extraordinaria.",
-      "Participar en cada actividad académica del Colegio de Radiología e Imagen del Estado de Guanajuato A.C.",
-    ],
-  },
-];
+import { IInfoCard } from "@/interface/member";
+import { infoCards } from "@/mock/member";
 
 export default function InfoCardsSection() {
   const [open, setOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<InfoCard | null>(null);
+  const [selectedCard, setSelectedCard] = useState<IInfoCard | null>(null);
 
-  const handleOpen = (card: InfoCard) => {
+  const handleOpen = (card: IInfoCard) => {
     setSelectedCard(card);
     setOpen(true);
   };
@@ -137,14 +53,30 @@ export default function InfoCardsSection() {
                 : ""
             }`}
           >
-            <InfoCard {...card} onClick={() => handleOpen(card)} />
+            <div
+              onClick={() => handleOpen(card)}
+              className="border rounded-xl shadow-sm p-6 flex flex-col bg-white cursor-pointer hover:shadow-md transition-all hover:-translate-y-1 text-center min-h-[280px] justify-between"
+            >
+              <div>
+                <h3
+                  className="text-2xl font-semibold text-[#0B4B2B] mb-3"
+                  dangerouslySetInnerHTML={{ __html: card.title }}
+                />
+                <p className="text-sm font-normal text-gray-500">
+                  {card.description}
+                </p>
+              </div>
+              <div className="mt-4 text-sm text-[#0B4B2B] font-medium">
+                <span>Ver más</span>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Sheet  */}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="sm:max-w-2xl mx-auto rounded-t-2xl p-8 max-h-[100vh] overflow-y-auto">
+        <SheetContent className="sm:max-w-2xl mx-auto rounded-t-2xl p-8 max-h-screen overflow-y-auto">
           <SheetHeader>
             <SheetTitle
               className="text-2xl font-semibold text-[#0B4B2B]"

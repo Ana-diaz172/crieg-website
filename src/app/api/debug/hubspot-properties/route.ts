@@ -1,4 +1,3 @@
-// app/api/debug/hubspot-properties/route.ts
 import { NextResponse } from "next/server";
 
 const HUBSPOT_ACCESS_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN!;
@@ -32,7 +31,6 @@ export async function GET() {
         const data = await response.json();
         const properties = data.results || [];
 
-        // Filtrar solo las propiedades relevantes
         const customProps = properties.filter((p: any) =>
             !p.name.startsWith("hs_") &&
             !p.name.startsWith("hubspot")
@@ -46,7 +44,6 @@ export async function GET() {
         const allCustomNames = customProps.map((p: any) => p.name).sort();
         const stripeNames = stripeProps.map((p: any) => p.name).sort();
 
-        // Campos que necesitamos para el webhook
         const requiredFields = [
             "stripe_customer_id",
             "stripe_session_id",

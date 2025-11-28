@@ -11,7 +11,6 @@ export async function POST(request: NextRequest) {
 
         console.log("[TEST] Finding contact:", email);
 
-        // 1. Buscar contacto
         const contact = await findContactByEmail(email);
 
         if (!contact) {
@@ -23,7 +22,6 @@ export async function POST(request: NextRequest) {
 
         console.log("[TEST] Contact found:", contact.id);
 
-        // 2. Preparar datos de prueba
         const testPaymentData = {
             stripe_customer_id: "cus_test_123456789",
             stripe_session_id: "cs_test_123456789",
@@ -39,12 +37,10 @@ export async function POST(request: NextRequest) {
 
         console.log("[TEST] Updating contact with test data...");
 
-        // 3. Actualizar contacto
         await updateHubspotContactPaymentFields(contact.id, testPaymentData);
 
         console.log("[TEST] Update complete");
 
-        // 4. Verificar actualización
         const updatedContact = await findContactByEmail(email);
 
         return NextResponse.json({

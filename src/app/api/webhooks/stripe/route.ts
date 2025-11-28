@@ -1,4 +1,3 @@
-// app/api/webhooks/stripe/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import {
@@ -25,13 +24,12 @@ type PaymentExtract = {
   chargeId?: string | null;
   invoiceId?: string | null;
   receiptUrl?: string | null;
-  amount?: number | null; // centavos
+  amount?: number | null;
   currency?: string | null;
   hubspotContactId?: string | null;
   membershipId?: string | null;
 };
 
-// ---- Helpers de nombre ----
 function titleCaseName(raw: string): string {
   return raw
     .trim()
@@ -76,7 +74,6 @@ async function resolveFullName(opts: {
   return "Miembro";
 }
 
-// ---- Extractores ----
 async function extractFromCheckoutSession(
   session: Stripe.Checkout.Session
 ): Promise<PaymentExtract> {
@@ -103,8 +100,6 @@ async function extractFromCheckoutSession(
       : null,
   };
 
-  // ✅ CRÍTICO: Leer membership_id PRIMERO de la metadata de la Session
-  // Este debe ser el primer lugar donde buscamos
   if (session.metadata?.membership_id) {
     out.membershipId = session.metadata.membership_id;
     console.log(`[EXTRACT] membership_id found in session.metadata: ${out.membershipId}`);
@@ -113,7 +108,6 @@ async function extractFromCheckoutSession(
     console.warn(`[EXTRACT] No membership_id in session.metadata`);
   }
 
-  // Expandimos PaymentIntent para completar datos de cargo, recibo e invoice
   if (out.paymentIntentId) {
     try {
       const pi = (await stripe.paymentIntents.retrieve(out.paymentIntentId, {
@@ -137,13 +131,11 @@ async function extractFromCheckoutSession(
         }
       }
 
-      // Si la Session no traía invoice, usa el del PI
       if (!out.invoiceId && pi.invoice) {
         out.invoiceId =
           typeof pi.invoice === "string" ? pi.invoice : pi.invoice.id;
       }
 
-      // ✅ FALLBACK: Solo si NO encontramos membership_id en la Session
       if (!out.membershipId && pi.metadata?.membership_id) {
         out.membershipId = pi.metadata.membership_id;
         console.log(`[EXTRACT] membership_id found in PI.metadata (fallback): ${out.membershipId}`);
@@ -162,7 +154,6 @@ async function extractFromCheckoutSession(
     }
   }
 
-  // ✅ Log final del resultado
   console.log(`[EXTRACT] Final membershipId: ${out.membershipId || 'NULL'}`);
 
   return out;
@@ -190,14 +181,12 @@ async function extractFromPaymentIntent(
       : null,
   };
 
-  // membership_id desde metadata del PI
   if (expanded.metadata && expanded.metadata.membership_id) {
     out.membershipId = expanded.metadata.membership_id as string;
   } else {
     out.membershipId = null;
   }
 
-  // Si no se encontró, intentar en la invoice expandida
   if (
     !out.membershipId &&
     expanded.invoice &&
@@ -239,7 +228,6 @@ async function extractFromPaymentIntent(
   return out;
 }
 
-// ---- HubSpot + Email (incluye nombre correcto) ----
 async function updateHubspotAndEmail(ex: PaymentExtract) {
 
   console.log('[UPDATE_HS_EMAIL] Starting with extracted data:', {
@@ -249,7 +237,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
     invoiceId: ex.invoiceId
   });
 
-  // 1) Resolver contacto en HubSpot
   let targetContactId = ex.hubspotContactId || null;
   let hsFirst = "";
   let hsLast = "";
@@ -261,7 +248,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
     foundContact = await findContactByEmail(ex.email);
     targetContactId = foundContact?.id || null;
   } else if (ex.email) {
-    // Si ya tenemos contactId, aún vale la pena intentar leer nombres de HS por email
     foundContact = await findContactByEmail(ex.email);
   }
 
@@ -270,7 +256,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
     hsLast = foundContact.lastname || "";
   }
 
-  // 2) Armar payload de pago (si hay contactId)
   if (targetContactId) {
     const paymentFields: Record<string, string> = {};
     if (ex.sessionId) paymentFields.stripe_session_id = ex.sessionId;
@@ -300,7 +285,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
   console.log(`[UPDATE_HS_EMAIL] membershipId value: "${membershipId}" (type: ${typeof membershipId})`);
   console.log(`[UPDATE_HS_EMAIL] Is FMRI? ${membershipId === "fmri"}`);
 
-  // 3) Enviar email según tipo de membresía
   if (ex.email) {
     const fullName = await resolveFullName({
       email: ex.email || undefined,
@@ -315,7 +299,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
         ? `https://${process.env.VERCEL_URL}`
         : undefined);
 
-    // 🔒 FMRI: solo correo, sin PDF
     if (membershipId === "fmri") {
       console.log('[UPDATE_HS_EMAIL] ✅ Sending FMRI email (no certificate)');
       const emailId = await sendFmriEmail({
@@ -334,7 +317,6 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
       );
     } else {
       console.log(`[UPDATE_HS_EMAIL] ✅ Sending certificate email for membershipId: ${membershipId || 'default'}`);
-      // Flujo normal con certificado
       const pdf = await generateCertificateBuffer({
         fullName,
         contactId: targetContactId || "N/A",
@@ -362,12 +344,10 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
   }
 }
 
-// ---- Handler principal ----
 export async function POST(request: NextRequest) {
   const started = Date.now();
 
   try {
-    // 1) Verificación de firma
     const rawBody = await request.text();
     const signature = request.headers.get("stripe-signature");
     if (!signature) {
@@ -400,7 +380,6 @@ export async function POST(request: NextRequest) {
       `[WEBHOOK] Event received: ${event.type} | ID: ${event.id}`
     );
 
-    // 2) Manejo de eventos
     if (
       event.type === "checkout.session.completed" ||
       event.type === "checkout.session.async_payment_succeeded"
@@ -490,7 +469,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Otros eventos
     console.log(`[WEBHOOK] Unhandled type: ${event.type}`);
     return NextResponse.json({ received: true });
   } catch (error: any) {

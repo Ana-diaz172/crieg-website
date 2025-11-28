@@ -16,14 +16,14 @@ import {
   UseFormTrigger,
   FieldErrors,
 } from "react-hook-form";
-import { FormData, ProfessionalType } from "@/app/checkout/[membership]/page";
+import { CheckoutFormData, ProfessionalType } from "@/interface/checkout";
 
 interface AcademicDataFormProps {
-  register: UseFormRegister<FormData>;
-  errors: FieldErrors<FormData>;
-  watch: UseFormWatch<FormData>;
-  setValue: UseFormSetValue<FormData>;
-  trigger: UseFormTrigger<FormData>;
+  register: UseFormRegister<CheckoutFormData>;
+  errors: FieldErrors<CheckoutFormData>;
+  watch: UseFormWatch<CheckoutFormData>;
+  setValue: UseFormSetValue<CheckoutFormData>;
+  trigger: UseFormTrigger<CheckoutFormData>;
 }
 
 export default function AcademicDataForm({

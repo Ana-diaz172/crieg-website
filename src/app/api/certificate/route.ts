@@ -12,10 +12,6 @@ type GenerateOptions = {
     contactId: string;
     sessionId?: string;
     offsetX?: number;
-    /** En prod, base del sitio para hacer fetch de /cert-template.pdf.
-     *  Ej: process.env.NEXT_PUBLIC_DOMAIN o `https://${process.env.VERCEL_URL}`
-     *  o derivado del request: `${req.nextUrl.protocol}//${req.headers.get('host')}`
-     */
     baseUrl?: string;
 };
 
@@ -80,7 +76,6 @@ export async function GET(req: NextRequest) {
             return NextResponse.json(debugPayload({ stage, error: 'Missing contact name', contact }), { status: 400 });
         }
 
-        // 4) Generar PDF (helper con baseUrl)
         stage.at = 'pdf_gen';
         const baseUrl = `${req.nextUrl.protocol}//${req.headers.get('host')}`;
         const pdf = await generateCertificateBuffer({
@@ -88,10 +83,9 @@ export async function GET(req: NextRequest) {
             contactId: contact.id,
             sessionId,
             offsetX: -70,
-            baseUrl, // 👈 importante en prod
+            baseUrl, 
         });
 
-        // 5) Responder
         stage.at = 'respond';
         const filename = `Reconocimiento - ${fullName.replace(/[/\\?%*:|"<>]/g, '')}.pdf`;
         return new NextResponse(new Uint8Array(pdf), {
@@ -111,7 +105,6 @@ export async function GET(req: NextRequest) {
 export async function generateCertificateBuffer(opts: GenerateOptions): Promise<Buffer> {
     const { fullName, contactId, sessionId, offsetX = -70, baseUrl } = opts;
 
-    // 1) Cargar plantilla
     const isVercel = !!process.env.VERCEL;
     let templateBytes: Uint8Array;
 
@@ -137,7 +130,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     const pdfDoc = await PDFDocument.load(templateBytes);
     const page = pdfDoc.getPages()[0];
 
-    // 2) Nombre centrado con offset
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontSize = 24;
     const text = fullName.toUpperCase();
@@ -152,7 +144,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         color: rgb(0.043, 0.294, 0.169),
     });
 
-    // 3) Footer con IDs
     const footerFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const rightMargin = 24;
     const bottomMargin = 18;
@@ -174,7 +165,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         x: fx, y: fy, size: footerSize, font: footerFont, color: rgb(0.2, 0.2, 0.2),
     });
 
-    // 4) Metadata
     pdfDoc.setTitle(`Reconocimiento - ${fullName}`);
     pdfDoc.setAuthor('CRIEG / FMRI');
     pdfDoc.setSubject('Reconocimiento oficial de membresía 2025');

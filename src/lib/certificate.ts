@@ -1,4 +1,3 @@
-// src/lib/certificate.ts
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import fs from 'fs/promises';
 import path from 'path';
@@ -8,10 +7,6 @@ type GenerateOptions = {
     contactId: string;
     sessionId?: string;
     offsetX?: number;
-    /** En prod, base del sitio para hacer fetch de /cert-template.pdf.
-     *  Ej: process.env.NEXT_PUBLIC_DOMAIN o `https://${process.env.VERCEL_URL}`
-     *  o derivado del request: `${req.nextUrl.protocol}//${req.headers.get('host')}`
-     */
     baseUrl?: string;
 };
 
@@ -27,7 +22,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         const buf = await fs.readFile(templatePath);
         templateBytes = new Uint8Array(buf);
     } else {
-        // Producción (Vercel) -> fetch a la URL pública
         const base =
             baseUrl ||
             process.env.NEXT_PUBLIC_DOMAIN ||
@@ -46,7 +40,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     const pdfDoc = await PDFDocument.load(templateBytes);
     const page = pdfDoc.getPages()[0];
 
-    // 2) Nombre centrado con offset
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontSize = 24;
     const text = fullName.toUpperCase();
@@ -61,7 +54,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         color: rgb(0.043, 0.294, 0.169),
     });
 
-    // 3) Footer con IDs (inferior derecha)
     const footerFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const rightMargin = 24;
     const bottomMargin = 18;
@@ -83,7 +75,6 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         x: fx, y: fy, size: footerSize, font: footerFont, color: rgb(0.2, 0.2, 0.2),
     });
 
-    // 4) Metadata
     pdfDoc.setTitle(`Reconocimiento - ${fullName}`);
     pdfDoc.setAuthor('CRIEG / FMRI');
     pdfDoc.setSubject('Reconocimiento oficial de membresía 2025');

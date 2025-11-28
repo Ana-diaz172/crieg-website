@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function HeroBanner() {
   return (
-    <section className="relative w-full h-[100vh] sm:h-[100vh] lg:h-full lg:min-h-[820px] overflow-hidden">
+    <section className="relative w-full h-screen sm:h-screen lg:h-full lg:min-h-[820px] overflow-hidden">
       {/* Background image */}
       <Image
         fill
@@ -17,10 +17,10 @@ export default function HeroBanner() {
       />
 
       {/* Top gradient (keeps your exact look, just responsive height) */}
-      <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent h-[110px] sm:h-[130px]" />
+      <div className="absolute inset-x-0 top-0 bg-linear-to-b from-black/70 to-transparent h-[110px] sm:h-[130px]" />
 
       {/* Bottom-to-top soft overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent" />
 
       {/* Content */}
       <div className="absolute left-0 bottom-20 sm:bottom-24 lg:bottom-20 w-full flex justify-center items-center">

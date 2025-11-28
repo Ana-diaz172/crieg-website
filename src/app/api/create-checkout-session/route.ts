@@ -4,7 +4,6 @@ import { createOrUpdateContact } from "@/lib/hubspot";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
-// Mapea tus membresías (centavos MXN)
 const memberships = {
     "crieg-medicos": {
         name: "Membresía Médicos Radiólogos CRIEG",
@@ -23,7 +22,6 @@ const memberships = {
     },
 } as const;
 
-// Helper para garantizar metadata de Stripe en string
 const toStripeMetadata = (obj: Record<string, unknown>) =>
     Object.fromEntries(
         Object.entries(obj)
@@ -56,7 +54,6 @@ type IncomingFormData = {
 
 export async function POST(request: NextRequest) {
     try {
-        // Validación de envs críticas
         if (!process.env.STRIPE_SECRET_KEY) {
             console.error("[CREATE_SESSION] Missing STRIPE_SECRET_KEY");
             return NextResponse.json(
@@ -128,7 +125,6 @@ export async function POST(request: NextRequest) {
             membershipId,
         });
 
-        // 1) Asegura contacto en HubSpot (ya incluye membership_id)
         const contactRes = await createOrUpdateContact(
             {
                 firstname: formData.firstname,
@@ -185,7 +181,6 @@ export async function POST(request: NextRequest) {
                 ? `https://${process.env.VERCEL_URL}`
                 : "http://localhost:3000");
 
-        // 2) Metadata base que viaja por Stripe
         const baseMetadata = toStripeMetadata({
             membership_id: membershipId,
             hubspot_contact_id: hubspotContactId,
@@ -194,7 +189,6 @@ export async function POST(request: NextRequest) {
             phone: formData.phone,
         });
 
-        // 3) Crea Customer en Stripe
         const customer = await stripe.customers.create({
             email,
             name: fullName,
@@ -203,7 +197,6 @@ export async function POST(request: NextRequest) {
 
         console.log("[CREATE_SESSION] Stripe customer:", customer.id);
 
-        // 4) Crea la sesión de Checkout + FACTURA
         const session = await stripe.checkout.sessions.create({
             mode: "payment",
             payment_method_types: ["card"],

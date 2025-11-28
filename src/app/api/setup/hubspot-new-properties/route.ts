@@ -23,7 +23,6 @@ const DEFAULT_GROUP = "contactinformation";
 const DEFAULT_TYPE = "string";
 const DEFAULT_FIELD_TYPE = "text";
 
-// 🧩 Lista súper sencilla de campos
 const simpleProperties: SimplePropertyConfig[] = [
     { name: "active_member", description: "Indica si el contacto es miembro activo" },
     { name: "university", description: "Universidad de estudios profesionales" },
@@ -39,27 +38,6 @@ const simpleProperties: SimplePropertyConfig[] = [
     { name: "head_professor_name", description: "Nombre del profesor titular o jefe de enseñanza" },
 ];
 
-/* 
-  active_member: string;
-
-  university: string;
-  specialty: string;
-  sub_specialty: string;
-  professional_id: string;
-  specialty_prof_id: string;
-  sub_specialty_prof_id: string;
-  validity_period: string;  
-  added_certification: string;
-
-  professional_type: ProfessionalType;
-  residency_location?: string;
-  current_residency_year?: string;
-  head_professor_name?: string;
-
-
-*/
-
-// 🧱 Construimos lo que espera HubSpot con defaults
 const properties: PropertyDefinition[] = simpleProperties.map((p) => ({
     name: p.name,
     label: p.label ?? p.name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),

@@ -7,7 +7,6 @@ import { useState } from "react";
 type AccordionKey = "education" | "collaboration" | "research" | null;
 
 export default function AboutHeroSection() {
-  // Mantiene por defecto abierto "education" como en tu diseño original
   const [expanded, setExpanded] = useState<AccordionKey>("education");
 
   const toggleItem = (key: Exclude<AccordionKey, null>) => {
@@ -58,9 +57,9 @@ export default function AboutHeroSection() {
                     Desarrollo profesional y la certificación continua
                   </span>
                   {expanded === "education" ? (
-                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Minus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   ) : (
-                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Plus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   )}
                 </button>
 
@@ -89,9 +88,9 @@ export default function AboutHeroSection() {
                     Colaboración interinstitucional y el trabajo en equipo
                   </span>
                   {expanded === "collaboration" ? (
-                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Minus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   ) : (
-                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Plus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   )}
                 </button>
 
@@ -118,9 +117,9 @@ export default function AboutHeroSection() {
                     Investigación y formación de nuevas generaciones
                   </span>
                   {expanded === "research" ? (
-                    <Minus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Minus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   ) : (
-                    <Plus className="h-5 w-5 text-gray-600 flex-shrink-0 ml-4" />
+                    <Plus className="h-5 w-5 text-gray-600 shrink-0 ml-4" />
                   )}
                 </button>
 
@@ -151,14 +150,14 @@ export default function AboutHeroSection() {
           {/* Right Image */}
           <div className="relative lg:h-screen flex items-center justify-center">
             <div className="relative w-full max-w-lg lg:max-w-none">
-              <div className="aspect-[4/5] lg:aspect-[3/4] xl:aspect-[4/5] overflow-hidden">
+              <div className="aspect-4/5 lg:aspect-3/4 xl:aspect-4/5 overflow-hidden">
                 <img
                   src="about-banner.webp"
                   alt="Médicos especializados en radiología trabajando en equipo"
                   className="w-full h-full object-cover"
                 />
                 {/* Gradient overlay profesional */}
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 via-transparent to-gray-900/20 mix-blend-overlay"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-blue-900/20 via-transparent to-gray-900/20 mix-blend-overlay"></div>
               </div>
             </div>
           </div>

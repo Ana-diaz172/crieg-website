@@ -1,192 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
 import Image from "next/image";
-import axios from "axios";
 
 import { Button } from "@/components/ui/button";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormSchema, FormSchemaType } from "@/schema/checkoutSchema";
 import PersonalDataForm from "@/components/checkout/PersonalDataForm";
 import AcademicDataForm from "@/components/checkout/AcademicDataForm";
 
-// Types
-type MembershipId =
-  | "crieg-medicos"
-  | "crieg-residentes"
-  | "fmri"
-  | "crieg-fmri";
-
-export type ProfessionalType = "medico" | "residente";
-
-export interface FormData {
-  firstname: string;
-  lastname: string;
-  email: string;
-  phone: string;
-  city: string;
-  date_of_birth: string;
-  active_member: string;
-
-  university: string;
-  specialty: string;
-  sub_specialty: string;
-  professional_id: string;
-  specialty_prof_id: string;
-  sub_specialty_prof_id: string;
-  validity_period: string;
-  added_certification: string;
-
-  professional_type: ProfessionalType;
-  residency_location?: string;
-  current_residency_year?: string;
-  head_professor_name?: string;
-}
-
-interface Membership {
-  name: string;
-  price: string;
-  description: string;
-}
-
-const memberships: Record<MembershipId, Membership> = {
-  "crieg-medicos": {
-    name: "Membresía Médicos Radiólogos CRIEG",
-    price: "$2,600",
-    description:
-      "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos.",
-  },
-  "crieg-residentes": {
-    name: "Membresía Residentes CRIEG",
-    price: "$600",
-    description:
-      "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día.",
-  },
-  fmri: {
-    name: "Membresía FMRI",
-    price: "$4,000",
-    description:
-      "Disfruta costos preferenciales en congresos y acceso a contenido académico exclusivo.",
-  },
-  "crieg-fmri": {
-    name: "Membresía CRIEG y FMRI",
-    price: "$6,600",
-    description:
-      "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
-  },
-};
+import { useCheckout } from "@/hooks/useCheckout";
 
 export default function CheckoutPage() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [step, setStep] = useState(1);
-  const params = useParams();
-  const router = useRouter();
-
   const {
-    register,
+    membership,
+    router,
+    error,
     handleSubmit,
+    onSubmit,
+    step,
+    register,
     watch,
     setValue,
     trigger,
-    clearErrors,
-    formState: { errors },
-  } = useForm<FormSchemaType>({
-    resolver: zodResolver(FormSchema),
-    mode: "onSubmit",
-    reValidateMode: "onChange",
-  });
-
-  const membershipId = params.membership as string;
-  const membership = membershipId
-    ? memberships[membershipId as MembershipId]
-    : null;
-
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    if (!membershipId) return;
-
-    const professionalType = watch("professional_type");
-    const step2Fields: (keyof FormData)[] = [
-      "university",
-      "specialty",
-      "sub_specialty",
-      "professional_id",
-      "specialty_prof_id",
-      "sub_specialty_prof_id",
-      "validity_period",
-      "added_certification",
-      "professional_type",
-    ];
-
-    if (professionalType === "residente") {
-      step2Fields.push(
-        "residency_location",
-        "current_residency_year",
-        "head_professor_name"
-      );
-    }
-
-    const isValid = await trigger(step2Fields);
-    if (!isValid) {
-      return; // No continuar si hay errores
-    }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const deleteCookie = (name: string) => {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${location.hostname}`;
-      };
-
-      ["hubspotutk", "__hssc", "__hssrc", "__hstc"].forEach(deleteCookie);
-
-      const response = await axios.post("/api/create-checkout-session", {
-        membershipId,
-        formData: data,
-      });
-
-      window.location.href = response.data.checkoutUrl;
-    } catch (err) {
-      console.error("Error:", err);
-      setError("Hubo un error al procesar el pago. Intenta de nuevo.");
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!membership) {
-      router.push("/");
-    }
-  }, [membership, router]);
-
-  const nextStep = async () => {
-    const fieldsToValidate: (keyof FormData)[] =
-      step === 1
-        ? [
-            "firstname",
-            "lastname",
-            "email",
-            "phone",
-            "city",
-            "date_of_birth",
-            "active_member",
-          ]
-        : [];
-
-    const valid = await trigger(fieldsToValidate);
-
-    if (valid) {
-      setStep((prev) => prev + 1);
-
-      setTimeout(() => {
-        clearErrors();
-      }, 0);
-    }
-  };
+    errors,
+    loading,
+    nextStep,
+    setStep,
+  } = useCheckout();
 
   if (!membership) {
     return (
@@ -210,7 +48,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-green-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-100 to-green-100">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* LEFT CONTENT SECTION */}
         <div className="flex-1 overflow-y-auto">

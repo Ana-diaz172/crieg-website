@@ -8,10 +8,9 @@ function SuccessContent() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get("session_id"); //
+  const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-    //verifica si hay un evento (revisar su hay un session_id)
     if (sessionId) {
       setLoading(false);
     } else {

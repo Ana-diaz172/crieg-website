@@ -1,4 +1,3 @@
-// app/api/setup/hubspot-properties/route.ts
 import { NextResponse } from "next/server";
 
 const HUBSPOT_ACCESS_TOKEN = process.env.HUBSPOT_ACCESS_TOKEN!;

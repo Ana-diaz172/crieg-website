@@ -1,4 +1,3 @@
-// src/app/api/send-test/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { loadCertTemplate } from '@/lib/load-template';
@@ -12,10 +11,8 @@ export async function POST(req: NextRequest) {
 
         if (!to) return NextResponse.json({ ok: false, error: 'to required' }, { status: 400 });
 
-        // ⚠️ Carga de la plantilla (funciona en local y en Vercel)
         const templateBytes = await loadCertTemplate(req);
 
-        // Genera PDF (puedes seguir usando tu generateCertificateBuffer si lo ajustas para recibir templateBytes)
         const pdfDoc = await PDFDocument.load(templateBytes);
         const page = pdfDoc.getPages()[0];
 
@@ -25,7 +22,7 @@ export async function POST(req: NextRequest) {
         const textWidth = font.widthOfTextAtSize(text, fontSize);
         const { width, height } = page.getSize();
 
-        const x = (width - textWidth) / 2 - 70; // tu offset
+        const x = (width - textWidth) / 2 - 70;
         const y = height * 0.45;
 
         page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.043, 0.294, 0.169) });
@@ -37,7 +34,6 @@ export async function POST(req: NextRequest) {
 
         const pdfBytes = await pdfDoc.save();
 
-        // Envía email
         const id = await sendCertificateEmail({ to, fullName, pdf: Buffer.from(pdfBytes) });
 
         return NextResponse.json({ ok: true, id });

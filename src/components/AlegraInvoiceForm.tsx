@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -21,149 +20,30 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  TAX_REGIME_OPTIONS,
+  CFDI_USE_OPTIONS,
+  MX_STATES,
+  PAYMENT_METHOD_OPTIONS,
+} from "@/constants/alegra";
+import { useAlegraInvoiceForm } from "@/hooks/useAlegraInvoiceForm";
 
 interface AlegraInvoiceFormProps {
   onSuccess?: (data: any) => void;
 }
 
-const TAX_REGIME_OPTIONS = [
-  { value: "601", label: "601 - General de Ley Personas Morales" },
-  { value: "603", label: "603 - Personas Morales con Fines no Lucrativos" },
-  { value: "605", label: "605 - Sueldos y Salarios e Ingresos Asimilados" },
-  {
-    value: "612",
-    label:
-      "612 - Personas Físicas con Actividades Empresariales y Profesionales",
-  },
-  { value: "626", label: "626 - Régimen Simplificado de Confianza" },
-];
-
-const CFDI_USE_OPTIONS = [
-  { value: "G01", label: "G01 - Adquisición de mercancías" },
-  { value: "G03", label: "G03 - Gastos en general" },
-  { value: "D01", label: "D01 - Honorarios médicos" },
-  {
-    value: "D02",
-    label: "D02 - Gastos médicos por incapacidad o discapacidad",
-  },
-  { value: "P01", label: "P01 - Por definir" },
-];
-
-// Formas de pago permitidas
-const PAYMENT_METHOD_OPTIONS = [
-  { value: "credit-card", label: "Tarjeta de crédito" },
-  { value: "debit-card", label: "Tarjeta de débito" },
-];
-
-const MX_STATES = [
-  "Aguascalientes",
-  "Baja California",
-  "Baja California Sur",
-  "Campeche",
-  "Chiapas",
-  "Chihuahua",
-  "Ciudad de México",
-  "Coahuila",
-  "Colima",
-  "Durango",
-  "Estado de México",
-  "Guanajuato",
-  "Guerrero",
-  "Hidalgo",
-  "Jalisco",
-  "Michoacán",
-  "Morelos",
-  "Nayarit",
-  "Nuevo León",
-  "Oaxaca",
-  "Puebla",
-  "Querétaro",
-  "Quintana Roo",
-  "San Luis Potosí",
-  "Sinaloa",
-  "Sonora",
-  "Tabasco",
-  "Tamaulipas",
-  "Tlaxcala",
-  "Veracruz",
-  "Yucatán",
-  "Zacatecas",
-];
-
 export default function AlegraInvoiceForm({
   onSuccess,
 }: AlegraInvoiceFormProps) {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    rfc: "",
-    businessName: "",
-    taxRegime: "",
-    cfdiUse: "",
-    street: "",
-    exteriorNumber: "",
-    interiorNumber: "",
-    neighborhood: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    purchaseId: "",
-    paymentMethod: "", // 👈 nuevo campo
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setSuccessMessage(null);
-    setIsSubmitting(true);
-
-    try {
-      console.log("📤 Enviando datos:", formData); // Debug
-
-      const res = await fetch("/api/invoicing/create-and-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-      console.log("📥 Respuesta del servidor:", data); // Debug
-
-      if (!res.ok) {
-        throw new Error(
-          data.error || "Ocurrió un error al generar la factura."
-        );
-      }
-
-      setSuccessMessage(
-        "Tu factura ha sido generada correctamente. Revisa tu correo electrónico."
-      );
-      if (onSuccess) onSuccess(data);
-    } catch (error: any) {
-      console.error("❌ Error:", error); // Debug
-      setErrorMessage(
-        error.message || "Error inesperado al generar la factura."
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    formData,
+    isSubmitting,
+    errorMessage,
+    successMessage,
+    handleChange,
+    handleSubmit,
+    setFormData,
+  } = useAlegraInvoiceForm({ onSuccess });
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">

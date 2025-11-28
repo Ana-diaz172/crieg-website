@@ -9,7 +9,7 @@ export default function ContactPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-green-100">
+    <div className="min-h-screen bg-linear-to-br from-gray-100 to-green-100">
       <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
         {/* Left Content Section  */}
         <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">

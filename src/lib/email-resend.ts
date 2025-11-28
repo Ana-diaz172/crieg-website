@@ -81,7 +81,7 @@ export async function sendInvoiceEmail(opts: {
   invoiceNumber: string | number;
   invoiceId: string | number;
   purchaseId?: string; // Stripe session/payment id
-  billingPortalUrl?: string; // tu página de facturación, opcional
+  billingPortalUrl?: string;
 }) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM;
@@ -151,16 +151,12 @@ Equipo CRIEG
   return data?.id;
 }
 
-/**
- * Email especial para membresía FMRI:
- * NO adjunta certificado, solo confirma la membresía y/o pago.
- */
 export async function sendFmriEmail(opts: {
   to: string;
   fullName: string;
   membershipId: string;
   invoiceId?: string | null;
-  amount?: number | null; // centavos
+  amount?: number | null;
   currency?: string | null;
   billingUrl?: string;
 }) {

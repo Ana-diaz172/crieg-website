@@ -5,9 +5,6 @@ const hubspotClient = new Client({
     accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
 });
 
-// ⚙️ Si pones HS_CUSTOM_FIELDS=1 en tus envs (Vercel), el código enviará
-// las propiedades personalizadas de membresía.
-// Si no, las filtrará automáticamente.
 const HS_CUSTOM_FIELDS = process.env.HS_CUSTOM_FIELDS === "1";
 
 const omitUndefined = <T extends Record<string, any>>(obj: T): Record<string, string> =>
@@ -15,7 +12,6 @@ const omitUndefined = <T extends Record<string, any>>(obj: T): Record<string, st
         Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== "")
     ) as Record<string, string>;
 
-// Lista de campos de pago que SIEMPRE se deben enviar (ya existen en HubSpot)
 const PAYMENT_FIELDS = [
     "stripe_customer_id",
     "stripe_session_id",
@@ -29,7 +25,6 @@ const PAYMENT_FIELDS = [
     "last_payment_date",
 ];
 
-// Campos personalizados de membresía que requieren estar creados en HubSpot
 const MEMBERSHIP_CUSTOM_FIELDS = [
     "date_of_birth",
     "active_member",
@@ -46,20 +41,15 @@ const MEMBERSHIP_CUSTOM_FIELDS = [
     "head_professor_name",
 ];
 
-// Filtra props personalizadas que no existen en el portal si HS_CUSTOM_FIELDS no está activo.
-// IMPORTANTE: NO filtra campos de pago (stripe_*, payment_status, etc) ni campos estándar de HubSpot
 function sanitizeContactProps(input: Record<string, string>): Record<string, string> {
     const base = { ...input };
 
     if (!HS_CUSTOM_FIELDS) {
-        // Quita props personalizadas que no existen EXCEPTO campos de pago
         Object.keys(base).forEach(key => {
-            // Mantener campos de pago (siempre existen)
             if (PAYMENT_FIELDS.includes(key)) {
                 return;
             }
 
-            // Filtrar campos personalizados de membresía si no hay HS_CUSTOM_FIELDS
             if (MEMBERSHIP_CUSTOM_FIELDS.includes(key)) {
                 delete base[key];
             }
@@ -69,7 +59,6 @@ function sanitizeContactProps(input: Record<string, string>): Record<string, str
     return base;
 }
 
-// Tipo de datos que van a HubSpot (SIN professional_type)
 export interface ContactData {
     firstname: string;
     lastname: string;
@@ -88,7 +77,6 @@ export interface ContactData {
     validity_period: string;
     added_certification: string;
 
-    // Campos condicionales de residentes (SÍ se guardan en HubSpot cuando tienen valor)
     residency_location?: string;
     current_residency_year?: string;
     head_professor_name?: string;
@@ -130,7 +118,6 @@ export async function findContactByEmail(email: string) {
             "stripe_amount",
             "stripe_currency",
             "last_payment_date",
-            // Campos de membresía
             "date_of_birth",
             "active_member",
             "university",
@@ -141,7 +128,6 @@ export async function findContactByEmail(email: string) {
             "sub_specialty_prof_id",
             "validity_period",
             "added_certification",
-            // Campos de residentes
             "residency_location",
             "current_residency_year",
             "head_professor_name",
@@ -157,7 +143,6 @@ export async function findContactByEmail(email: string) {
         email: c.properties?.email || "",
         phone: c.properties?.phone || "",
         city: c.properties?.city || "",
-        // Campos de pago
         payment_status: c.properties?.payment_status || "",
         stripe_session_id: c.properties?.stripe_session_id || "",
         stripe_payment_intent_id: c.properties?.stripe_payment_intent_id || "",
@@ -168,7 +153,6 @@ export async function findContactByEmail(email: string) {
         stripe_amount: c.properties?.stripe_amount || "",
         stripe_currency: c.properties?.stripe_currency || "",
         last_payment_date: c.properties?.last_payment_date || "",
-        // Campos de membresía
         date_of_birth: c.properties?.date_of_birth || "",
         active_member: c.properties?.active_member || "",
         university: c.properties?.university || "",
@@ -179,7 +163,6 @@ export async function findContactByEmail(email: string) {
         sub_specialty_prof_id: c.properties?.sub_specialty_prof_id || "",
         validity_period: c.properties?.validity_period || "",
         added_certification: c.properties?.added_certification || "",
-        // Campos de residentes
         residency_location: c.properties?.residency_location || "",
         current_residency_year: c.properties?.current_residency_year || "",
         head_professor_name: c.properties?.head_professor_name || "",
@@ -224,13 +207,11 @@ export async function upsertContactByEmail(
             ...(extraProps ?? {}),
         });
 
-        // 🔒 Filtro/mapeo seguro según HS_CUSTOM_FIELDS
         const safeProps = sanitizeContactProps(mergedProps);
 
         console.log("[HUBSPOT] Upserting contact:", data.email);
         console.log("[HUBSPOT] Properties to send:", Object.keys(safeProps));
 
-        // 1) Buscar por email
         const found = await hubspotClient.crm.contacts.searchApi.doSearch({
             filterGroups: [
                 {
@@ -253,7 +234,6 @@ export async function upsertContactByEmail(
             return { success: true, contactId };
         }
 
-        // 2) Crear si no existe
         console.log("[HUBSPOT] Creating new contact");
         const created = await hubspotClient.crm.contacts.basicApi.create({
             properties: safeProps,
@@ -262,7 +242,6 @@ export async function upsertContactByEmail(
     } catch (err: any) {
         console.error("[HUBSPOT] Upsert error:", err?.message || err);
 
-        // Carrera paralela: si llega 409, vuelve a buscar y actualiza
         if (err?.statusCode === 409) {
             try {
                 console.log("[HUBSPOT] Handling 409 conflict...");
@@ -285,7 +264,6 @@ export async function upsertContactByEmail(
                     const contactId = (searchAgain.results[0] as any).id as string;
                     console.log("[HUBSPOT] Found contact after conflict:", contactId);
 
-                    // En update solo manda extraProps y cosas seguras
                     const safeUpdate = sanitizeContactProps(omitUndefined(extraProps ?? {}));
                     if (Object.keys(safeUpdate).length) {
                         await hubspotClient.crm.contacts.basicApi.update(contactId, {
@@ -304,9 +282,6 @@ export async function upsertContactByEmail(
     }
 }
 
-/**
- * Mantiene compatibilidad con tu API anterior; delega a upsert con `stripe_session_id`.
- */
 export async function createOrUpdateContact(
     data: ContactData,
     stripeSessionId?: string
@@ -318,10 +293,6 @@ export async function createOrUpdateContact(
     return { success: false, error: (res as any).error };
 }
 
-/**
- * Actualiza campos de pago por contactId.
- * IMPORTANTE: Los campos de pago NO se sanitizan (siempre se envían)
- */
 export async function updateHubspotContactPaymentFields(
     contactId: string,
     props: Record<string, string | undefined>
@@ -331,8 +302,6 @@ export async function updateHubspotContactPaymentFields(
     console.log("[HUBSPOT] Updating payment fields for contact:", contactId);
     console.log("[HUBSPOT] Payment properties:", Object.keys(properties));
 
-    // Los campos de pago siempre se envían sin sanitización
-    // porque ya existen en HubSpot (creados con el script)
     await hubspotClient.crm.contacts.basicApi.update(contactId, {
         properties,
     });

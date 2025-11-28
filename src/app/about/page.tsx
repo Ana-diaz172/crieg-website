@@ -1,14 +1,6 @@
 import Image from "next/image";
 
 export default function AboutDetailedPage() {
-  const partnerships = [
-    "Hospital de Especialidades del Bajío",
-    "Centro Médico de León",
-    "Hospital Regional de León",
-    "Instituto de Diagnóstico por Imagen",
-    "Clínica de Especialidades Médicas",
-    "Hospital General de Guanajuato",
-  ];
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -107,35 +99,35 @@ export default function AboutDetailedPage() {
 
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700 leading-relaxed">
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Trabajo en equipo
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Sentido de pertenencia
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Solidaridad
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Calidad
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Academia
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Originalidad
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Responsabilidad
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Confianza
                 </li>
               </ul>
@@ -151,34 +143,34 @@ export default function AboutDetailedPage() {
 
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Agrupar en un cuerpo colegiado a los Médicos Especializados en
                   Radiología Diagnóstica y Terapéutica del Estado de Guanajuato.
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Crear y organizar eventos para la difusión del conocimiento en
                   la especialidad tanto de forma presencial como a través de
                   medios electrónicos.
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Promover la certificación ante el Consejo Mexicano de
                   Radiología e Imagen.
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Estimular la investigación.
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Fomentar la relación del Colegio con otras organizaciones
                   médicas estatales, con asociaciones médicas de otros estados,
                   con sociedades médicas nacionales y con organismos médicos
                   extranjeros.
                 </li>
                 <li className="flex items-start">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  <span className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 shrink-0"></span>
                   Involucrar a los médicos residentes de las sedes de la
                   especialidad en el Estado de Guanajuato en la actividad
                   académica del Colegio de Radiología e Imagen del Estado de
