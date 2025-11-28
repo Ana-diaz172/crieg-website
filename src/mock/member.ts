@@ -1,3 +1,4 @@
+import { PRICES } from "@/constants/prices";
 import { ICheckoutMembership, IInfoCard, IMembershipId, Member, Membership } from "@/interface/member";
 
 export const members: Member[] = [
@@ -33,9 +34,9 @@ export const memberships: Membership[] = [
         title: "Membresía Médicos Radiólogos CRIEG",
         description:
             "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG vigente.",
-        price: "$2,600",
+        price: PRICES.CRIEG_MEDICOS.showPrice,
         priceSuffix: "/anual 2025",
-        priceAmount: 260000,
+        priceAmount: PRICES.CRIEG_MEDICOS.priceAmount,
         features: [
             "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
             "Regularización automática al pagar la cuota 2025.",
@@ -47,9 +48,9 @@ export const memberships: Membership[] = [
         title: "Membresía <br /> Residentes CRIEG",
         description:
             "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día con regularización automática.",
-        price: "$600",
+        price: PRICES.CRIEG_RESIDENTES.showPrice,
         priceSuffix: "/anual 2025",
-        priceAmount: 60000,
+        priceAmount: PRICES.CRIEG_RESIDENTES.priceAmount,
         features: [
             "Cuotas preferenciales para el Congreso Virtual de Mayo y el Congreso Cervantino de Imágenes Médicas.",
             "Regularización automática al pagar la cuota 2025.",
@@ -60,9 +61,9 @@ export const memberships: Membership[] = [
         title: "Membresía FMRI",
         description:
             "Disfruta costos preferenciales en congresos, acceso a contenido académico exclusivo y reconocimiento oficial con la carta de pertenencia a la FMRI.",
-        price: "$4,000",
+        price: PRICES.FMRI.showPrice,
         priceSuffixLines: ["/hasta el 9 de marzo", "2025"],
-        priceAmount: 400000,
+        priceAmount: PRICES.FMRI.priceAmount,
         features: [
             "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
             "Acceso al Journal con contenido académico exclusivo.",
@@ -74,9 +75,9 @@ export const memberships: Membership[] = [
         title: "Membresía CRIEG y FMRI",
         description:
             "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
-        price: "$6,600",
+        price: PRICES.CRIEG_FMRI.showPrice,
         priceSuffix: "/anual 2025",
-        priceAmount: 660000,
+        priceAmount: PRICES.CRIEG_FMRI.priceAmount,
         features: [
             "Cuotas preferenciales para los Congresos de Ultrasonido en Mérida y el Seccional en Guadalajara.",
             "Acceso al Journal con contenido académico exclusivo.",
@@ -143,29 +144,28 @@ export const infoCards: IInfoCard[] = [
     },
 ];
 
-
 export const checkoutMemberships: Record<IMembershipId, ICheckoutMembership> = {
     "crieg-medicos": {
         name: "Membresía Médicos Radiólogos CRIEG",
-        price: "$2,600",
+        price: PRICES.CRIEG_MEDICOS.showPrice,
         description:
             "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos.",
     },
     "crieg-residentes": {
         name: "Membresía Residentes CRIEG",
-        price: "$600",
+        price: PRICES.CRIEG_RESIDENTES.showPrice,
         description:
             "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día.",
     },
     fmri: {
         name: "Membresía FMRI",
-        price: "$4,000",
+        price: PRICES.FMRI.showPrice,
         description:
             "Disfruta costos preferenciales en congresos y acceso a contenido académico exclusivo.",
     },
     "crieg-fmri": {
         name: "Membresía CRIEG y FMRI",
-        price: "$6,600",
+        price: PRICES.CRIEG_FMRI.showPrice,
         description:
             "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
     },

@@ -1,24 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createOrUpdateContact } from "@/lib/hubspot";
+import { PRICES } from "@/constants/prices";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 const memberships = {
     "crieg-medicos": {
         name: "Membresía Médicos Radiólogos CRIEG",
-        description: "...",
-        amount: 260000,
+        description: "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG vigente.",
+        amount: PRICES.CRIEG_MEDICOS.priceAmount,
     },
     "crieg-residentes": {
         name: "Membresía Residentes CRIEG",
-        description: "...",
-        amount: 60000,
+        description: "Accede a congresos con tarifas preferenciales y mantén tu membresía CRIEG al día con regularización automática.",
+        amount: PRICES.CRIEG_RESIDENTES.priceAmount ,
     },
     fmri: {
         name: "Membresía FMRI",
-        description: "...",
-        amount: 400000,
+        description: "Disfruta costos preferenciales en congresos, acceso a contenido académico exclusivo y reconocimiento oficial con la carta de pertenencia a la FMRI.",
+        amount: PRICES.FMRI.priceAmount,
+    },
+    "crieg-fmri": {
+        name: "Membresía CRIEG y FMRI",
+        description: "Accede a congresos con tarifas preferenciales, respaldo institucional y beneficios exclusivos al mantener tu membresía CRIEG y FMRI vigente.",
+        amount: PRICES.CRIEG_FMRI.priceAmount,
     },
 } as const;
 
