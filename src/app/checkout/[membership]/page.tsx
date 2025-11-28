@@ -78,31 +78,6 @@ const memberships: Record<MembershipId, Membership> = {
   },
 };
 
-const personalFields: (keyof FormData)[] = [
-  "firstname",
-  "lastname",
-  "email",
-  "phone",
-  "city",
-  "date_of_birth",
-  "active_member",
-];
-
-const academicFields: (keyof FormData)[] = [
-  "university",
-  "specialty",
-  "sub_specialty",
-  "professional_id",
-  "specialty_prof_id",
-  "sub_specialty_prof_id",
-  "validity_period",
-  "added_certification",
-  "professional_type",
-  "residency_location",
-  "current_residency_year",
-  "head_professor_name",
-];
-
 export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

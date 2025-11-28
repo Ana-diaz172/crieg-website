@@ -80,8 +80,8 @@ export async function sendInvoiceEmail(opts: {
   fullName: string;
   invoiceNumber: string | number;
   invoiceId: string | number;
-  purchaseId?: string;            // Stripe session/payment id
-  billingPortalUrl?: string;      // tu página de facturación, opcional
+  purchaseId?: string; // Stripe session/payment id
+  billingPortalUrl?: string; // tu página de facturación, opcional
 }) {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM;
@@ -143,6 +143,92 @@ Equipo CRIEG
     from,
     to,
     subject: `Tu factura ${safeInvoiceNumber}`,
+    text: textBody,
+    html: htmlBody,
+  });
+
+  if (error) throw error;
+  return data?.id;
+}
+
+/**
+ * Email especial para membresía FMRI:
+ * NO adjunta certificado, solo confirma la membresía y/o pago.
+ */
+export async function sendFmriEmail(opts: {
+  to: string;
+  fullName: string;
+  membershipId: string;
+  invoiceId?: string | null;
+  amount?: number | null; // centavos
+  currency?: string | null;
+  billingUrl?: string;
+}) {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM;
+  if (!key || !from) {
+    throw new Error(`Missing Resend envs: key=${!!key}, from=${from}`);
+  }
+
+  const resend = new Resend(key);
+  const { to, fullName, membershipId, invoiceId, amount, currency, billingUrl } = opts;
+
+  const saludo = `Estimado${fullName.trim().endsWith("a") ? "a" : ""} ${fullName},`;
+  const safeInvoice = invoiceId || "—";
+  const billingLink =
+    billingUrl || process.env.NEXT_PUBLIC_BILLING_PORTAL_URL || "#";
+
+  const formattedAmount =
+    typeof amount === "number"
+      ? (amount / 100).toLocaleString("es-MX", {
+        style: "currency",
+        currency: (currency || "mxn").toUpperCase(),
+      })
+      : "—";
+
+  const textBody = `${saludo}
+
+Gracias por completar tu proceso de membresía FMRI (${membershipId}).
+
+Datos de tu pago:
+- Monto: ${formattedAmount}
+- Invoice ID (Stripe/Alegra): ${safeInvoice}
+
+Puedes consultar o gestionar tu facturación en:
+${billingLink}
+
+Si necesitas apoyo, responde a este correo.
+
+Saludos,
+Equipo CRIEG
+`;
+
+  const htmlBody = `
+  <p>${saludo}</p>
+  <p>Gracias por completar tu proceso de membresía <strong>FMRI</strong> (<code>${membershipId}</code>).</p>
+
+  <h3>Datos de tu pago</h3>
+  <ul>
+    <li><strong>Monto:</strong> ${formattedAmount}</li>
+    <li><strong>Invoice ID (Stripe/Alegra):</strong> ${safeInvoice}</li>
+  </ul>
+
+  <p>Puedes consultar o gestionar tu facturación en:</p>
+  <p>
+    <a href="${billingLink}" target="_blank" rel="noopener"
+       style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
+      Ir al portal de facturación
+    </a>
+  </p>
+
+  <p>Si necesitas apoyo, responde a este correo.</p>
+  <p>Saludos,<br/>Equipo CRIEG</p>
+`;
+
+  const { data, error } = await resend.emails.send({
+    from,
+    to,
+    subject: "Confirmación de membresía FMRI",
     text: textBody,
     html: htmlBody,
   });

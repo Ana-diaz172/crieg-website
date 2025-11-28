@@ -92,6 +92,8 @@ export interface ContactData {
     residency_location?: string;
     current_residency_year?: string;
     head_professor_name?: string;
+
+    membership_id?: string;
 }
 
 /**
@@ -213,6 +215,8 @@ export async function upsertContactByEmail(
             residency_location: data.residency_location,
             current_residency_year: data.current_residency_year,
             head_professor_name: data.head_professor_name,
+
+            membership_id: data.membership_id,
         });
 
         const mergedProps = omitUndefined({
