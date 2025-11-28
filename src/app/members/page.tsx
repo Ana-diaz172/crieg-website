@@ -9,8 +9,8 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { IInfoCard } from "@/interface/member";
 import { infoCards } from "@/mock/member";
+import { IInfoCard } from "@/interface/member";
 
 export default function InfoCardsSection() {
   const [open, setOpen] = useState(false);
