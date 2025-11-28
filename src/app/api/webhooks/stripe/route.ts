@@ -103,56 +103,67 @@ async function extractFromCheckoutSession(
       : null,
   };
 
-  // membership_id directo de metadata de la Session
-  if (session.metadata && session.metadata.membership_id) {
-    out.membershipId = session.metadata.membership_id as string;
+  // ✅ CRÍTICO: Leer membership_id PRIMERO de la metadata de la Session
+  // Este debe ser el primer lugar donde buscamos
+  if (session.metadata?.membership_id) {
+    out.membershipId = session.metadata.membership_id;
+    console.log(`[EXTRACT] membership_id found in session.metadata: ${out.membershipId}`);
   } else {
     out.membershipId = null;
+    console.warn(`[EXTRACT] No membership_id in session.metadata`);
   }
 
   // Expandimos PaymentIntent para completar datos de cargo, recibo e invoice
   if (out.paymentIntentId) {
-    const pi = (await stripe.paymentIntents.retrieve(out.paymentIntentId, {
-      expand: ["latest_charge", "invoice"],
-    })) as Stripe.PaymentIntent & {
-      latest_charge?: string | Stripe.Charge;
-      invoice?: string | Stripe.Invoice;
-    };
+    try {
+      const pi = (await stripe.paymentIntents.retrieve(out.paymentIntentId, {
+        expand: ["latest_charge", "invoice"],
+      })) as Stripe.PaymentIntent & {
+        latest_charge?: string | Stripe.Charge;
+        invoice?: string | Stripe.Invoice;
+      };
 
-    out.amount = pi.amount_received ?? out.amount ?? pi.amount ?? null;
-    out.currency = pi.currency ?? out.currency ?? null;
+      out.amount = pi.amount_received ?? out.amount ?? pi.amount ?? null;
+      out.currency = pi.currency ?? out.currency ?? null;
 
-    if (pi.latest_charge) {
-      if (typeof pi.latest_charge === "string") {
-        out.chargeId = pi.latest_charge;
-        const ch = await stripe.charges.retrieve(pi.latest_charge);
-        out.receiptUrl = ch.receipt_url ?? null;
-      } else {
-        out.chargeId = pi.latest_charge.id;
-        out.receiptUrl = pi.latest_charge.receipt_url ?? null;
+      if (pi.latest_charge) {
+        if (typeof pi.latest_charge === "string") {
+          out.chargeId = pi.latest_charge;
+          const ch = await stripe.charges.retrieve(pi.latest_charge);
+          out.receiptUrl = ch.receipt_url ?? null;
+        } else {
+          out.chargeId = pi.latest_charge.id;
+          out.receiptUrl = pi.latest_charge.receipt_url ?? null;
+        }
       }
-    }
 
-    // Si la Session no traía invoice, usa el del PI
-    if (!out.invoiceId && pi.invoice) {
-      out.invoiceId =
-        typeof pi.invoice === "string" ? pi.invoice : pi.invoice.id;
-    }
+      // Si la Session no traía invoice, usa el del PI
+      if (!out.invoiceId && pi.invoice) {
+        out.invoiceId =
+          typeof pi.invoice === "string" ? pi.invoice : pi.invoice.id;
+      }
 
-    // Como refuerzo, intenta leer membership_id de PI o de la invoice
-    if (!out.membershipId && pi.metadata && pi.metadata.membership_id) {
-      out.membershipId = pi.metadata.membership_id as string;
-    }
-    if (
-      !out.membershipId &&
-      pi.invoice &&
-      typeof pi.invoice !== "string" &&
-      pi.invoice.metadata &&
-      pi.invoice.metadata.membership_id
-    ) {
-      out.membershipId = pi.invoice.metadata.membership_id as string;
+      // ✅ FALLBACK: Solo si NO encontramos membership_id en la Session
+      if (!out.membershipId && pi.metadata?.membership_id) {
+        out.membershipId = pi.metadata.membership_id;
+        console.log(`[EXTRACT] membership_id found in PI.metadata (fallback): ${out.membershipId}`);
+      }
+      if (
+        !out.membershipId &&
+        pi.invoice &&
+        typeof pi.invoice !== "string" &&
+        pi.invoice.metadata?.membership_id
+      ) {
+        out.membershipId = pi.invoice.metadata.membership_id;
+        console.log(`[EXTRACT] membership_id found in invoice.metadata (fallback): ${out.membershipId}`);
+      }
+    } catch (error) {
+      console.error(`[EXTRACT] Error expanding PaymentIntent:`, error);
     }
   }
+
+  // ✅ Log final del resultado
+  console.log(`[EXTRACT] Final membershipId: ${out.membershipId || 'NULL'}`);
 
   return out;
 }
@@ -230,6 +241,14 @@ async function extractFromPaymentIntent(
 
 // ---- HubSpot + Email (incluye nombre correcto) ----
 async function updateHubspotAndEmail(ex: PaymentExtract) {
+
+  console.log('[UPDATE_HS_EMAIL] Starting with extracted data:', {
+    email: ex.email,
+    membershipId: ex.membershipId,
+    sessionId: ex.sessionId,
+    invoiceId: ex.invoiceId
+  });
+
   // 1) Resolver contacto en HubSpot
   let targetContactId = ex.hubspotContactId || null;
   let hsFirst = "";
@@ -278,6 +297,9 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
 
   const membershipId = ex.membershipId || null;
 
+  console.log(`[UPDATE_HS_EMAIL] membershipId value: "${membershipId}" (type: ${typeof membershipId})`);
+  console.log(`[UPDATE_HS_EMAIL] Is FMRI? ${membershipId === "fmri"}`);
+
   // 3) Enviar email según tipo de membresía
   if (ex.email) {
     const fullName = await resolveFullName({
@@ -295,6 +317,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
 
     // 🔒 FMRI: solo correo, sin PDF
     if (membershipId === "fmri") {
+      console.log('[UPDATE_HS_EMAIL] ✅ Sending FMRI email (no certificate)');
       const emailId = await sendFmriEmail({
         to: ex.email,
         fullName,
@@ -306,11 +329,11 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
       });
 
       console.log(
-        `[EMAIL] FMRI email sent | id: ${emailId} | to: ${ex.email} | membershipId: ${
-          membershipId || "N/A"
+        `[EMAIL] FMRI email sent | id: ${emailId} | to: ${ex.email} | membershipId: ${membershipId || "N/A"
         } | invoice: ${ex.invoiceId ?? "N/A"}`
       );
     } else {
+      console.log(`[UPDATE_HS_EMAIL] ✅ Sending certificate email for membershipId: ${membershipId || 'default'}`);
       // Flujo normal con certificado
       const pdf = await generateCertificateBuffer({
         fullName,
@@ -329,10 +352,8 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
       });
 
       console.log(
-        `[EMAIL] Certificate email sent | id: ${emailId} | to: ${
-          ex.email
-        } | membershipId: ${membershipId || "N/A"} | invoice: ${
-          ex.invoiceId ?? "N/A"
+        `[EMAIL] Certificate email sent | id: ${emailId} | to: ${ex.email
+        } | membershipId: ${membershipId || "N/A"} | invoice: ${ex.invoiceId ?? "N/A"
         }`
       );
     }
