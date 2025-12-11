@@ -28,6 +28,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            var _hsq = window._hsq = window._hsq || [];
+            _hsq.push(['setPath', window.location.pathname]);
+            _hsq.push(['doNotTrackForms', true]); // 👈 Esto desactiva la captura automática
+          `,
+        }}
+      />
+      <script
         type="text/javascript"
         id="hs-script-loader"
         async

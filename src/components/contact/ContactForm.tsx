@@ -1,158 +1,210 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-
-// 1. Definición del Esquema de Validación con Zod
-const ContactSchema = z.object({
-  name: z.string().min(2, {
-    message: "El name debe tener al menos 2 caracteres.",
-  }).max(50, {
-    message: "El name no puede exceder los 50 caracteres.",
-  }),
-  email: z.string().email({
-    message: "Debe ser una dirección de correo válida.",
-  }),
-  phone: z.string().min(8, {
-    message: "El teléfono debe tener al menos 8 dígitos."
-  }).max(15, {
-    message: "El teléfono no puede exceder los 15 dígitos."
-  }),
-  note: z.string().min(1, {
-    message: "El mensaje es obligatorio.",
-  }).max(500, {
-    message: "El mensaje es demasiado largo (máximo 500 caracteres).",
-  }),
-});
-
-// Tipado del formulario
-type ContactFormValues = z.infer<typeof ContactSchema>;
-
+import { useState } from "react";
+import { Send, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function ContactForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-    reset
-  } = useForm<ContactFormValues>({
-    resolver: zodResolver(ContactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      note: "",
-    },
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
   });
 
-  async function onSubmit(data: ContactFormValues) {
-    console.log("Datos del formulario enviados:", data);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMessage("");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500)); 
-      reset(); 
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al enviar el mensaje");
+      }
+
+      setStatus("success");
+
+      // Limpiar formulario
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+
+      // Reset success message después de 5 segundos
+      setTimeout(() => setStatus("idle"), 5000);
     } catch (error) {
-      console.error("Error al enviar el formulario:", error);
+      setStatus("error");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Error al enviar el mensaje. Por favor intenta nuevamente."
+      );
     }
-  }
+  };
 
-  // Componente de Ayuda para Mostrar Errores
-  const ErrorMessage = ({ message }: { message: string | undefined }) => (
-    <p className="mt-1 text-sm text-red-600 h-5">{message}</p>
-  );
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
-    // CAMBIO CLAVE: max-w-xl (aprox 512px) cambiado a max-w-3xl (aprox 768px)
-    <div className="w-full p-6 bg-white shadow-lg rounded-xl border border-gray-100">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Envíanos un mensaje</h2>
-
-      {/* note de éxito visible después de un envío exitoso */}
-      {isSubmitSuccessful && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg">
-          ¡Gracias! Tu note ha sido enviado exitosamente. Nos pondremos en contacto pronto.
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        
+    <div className="w-full max-w-2xl">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Nombre */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Nombre completo *
           </label>
           <input
-            id="name"
             type="text"
-            {...register("name")}
-            className={`mt-1 block w-full rounded-md border p-2 focus:ring-[#0B4B2B] focus:border-[#0B4B2B] ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isSubmitting}
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            disabled={status === "loading"}
+            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="Ej: Dr. Juan Pérez"
           />
-          <ErrorMessage message={errors.name?.message} />
         </div>
 
+        {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Correo electrónico *
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Email *
           </label>
           <input
-            id="correo"
             type="email"
-            {...register("email")}
-            className={`mt-1 block w-full rounded-md border p-2 focus:ring-[#0B4B2B] focus:border-[#0B4B2B] ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isSubmitting}
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            disabled={status === "loading"}
+            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="tu@email.com"
           />
-          <ErrorMessage message={errors.email?.message} />
         </div>
 
-        {/* Campo Teléfono */}
+        {/* Teléfono */}
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Teléfono *
+          <label
+            htmlFor="phone"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
+            Teléfono (opcional)
           </label>
           <input
-            id="phone"
             type="tel"
-            {...register("phone")}
-            className={`mt-1 block w-full rounded-md border p-2 focus:ring-[#0B4B2B] focus:border-[#0B4B2B] ${
-              errors.phone ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isSubmitting}
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            disabled={status === "loading"}
+            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="+52 477 123 4567"
           />
-          <ErrorMessage message={errors.phone?.message} />
         </div>
 
-        {/* Campo note Libre */}
+        {/* Mensaje */}
         <div>
-          <label htmlFor="note" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="message"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Mensaje *
           </label>
           <textarea
-            id="note"
-            rows={4}
-            {...register("note")}
-            className={`mt-1 block w-full rounded-md border p-2 focus:ring-[#0B4B2B] focus:border-[#0B4B2B] ${
-              errors.note ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isSubmitting}
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            required
+            disabled={status === "loading"}
+            rows={5}
+            className="w-full px-4 bg-white py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="Escribe tu mensaje aquí..."
           />
-          <ErrorMessage message={errors.note?.message} />
         </div>
-        
-        {/* Botón de Envío */}
-        <div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full inline-flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0B4B2B] hover:bg-[#0D5C36] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0B4B2B] disabled:opacity-50 transition"
-          >
-            {isSubmitting ? 'Enviando...' : 'Enviar mensaje'}
-          </button>
-        </div>
+
+        {/* Mensaje de éxito */}
+        {status === "success" && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start space-x-3">
+            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-green-800 font-medium text-sm">
+                ¡Mensaje enviado correctamente!
+              </p>
+              <p className="text-green-700 text-sm mt-1">
+                Te responderemos a la brevedad posible.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Mensaje de error */}
+        {status === "error" && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-800 font-medium text-sm">
+                Error al enviar el mensaje
+              </p>
+              <p className="text-red-700 text-sm mt-1">{errorMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Botón de envío */}
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="w-full bg-[#0B4B2B] text-white py-4 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+        >
+          {status === "loading" ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Enviando...</span>
+            </>
+          ) : (
+            <>
+              <span>Enviar mensaje</span>
+              <Send className="h-5 w-5" />
+            </>
+          )}
+        </button>
+
+        {/* Nota de privacidad */}
+        <p className="text-xs text-gray-500 text-center">
+          Al enviar este formulario, aceptas que CRIEG procese tus datos para
+          responder a tu consulta.
+        </p>
       </form>
     </div>
   );

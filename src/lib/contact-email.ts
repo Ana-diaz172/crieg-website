@@ -6,7 +6,7 @@ export async function sendContactEmail(opts: {
     phone?: string;
     message: string;
 }) {
-    const key = process.env.RESEND_API_KEY;
+    const key = process.env.RESEND_API_CONTACT;
     const from = process.env.RESEND_FROM;
     const contactTo = process.env.RESEND_CONTACT_TO || "contacto@crieg.com.mx";
 
