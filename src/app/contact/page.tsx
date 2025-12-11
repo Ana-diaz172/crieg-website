@@ -1,143 +1,184 @@
 "use client";
 
-import { ArrowRight, Menu } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
-import ContactForm from "@/components/contact/ContactForm";
+import { Send, Loader2 } from "lucide-react";
 
-export default function ContactPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function ContactForm() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al enviar el mensaje");
+      }
+
+      setStatus("success");
+      // Limpiar formulario
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+
+      // Reset success message después de 5 segundos
+      setTimeout(() => setStatus("idle"), 5000);
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error al enviar el mensaje"
+      );
+    }
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-100 to-green-100">
-      <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
-        {/* Left Content Section  */}
-        <div className="flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 lg:py-0">
-          {/* Header */}
-          <div className="mb-16">
-            <h1 className="mt-20 text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-gray-900 mb-6">
-              Mantente en
-              <br />
-              contacto con CRIEG
-            </h1>
-
-            <p className="text-lg sm:text-xl text-gray-700 leading-relaxed max-w-lg">
-              Estamos aquí para resolver cualquier duda
-              <br />
-              o consulta. Ya seas médico especialista
-              <br />o residente, te tenemos cubierto.
-            </p>
-          </div>
-
-          <ContactForm />
-
-          {/* Contact Information */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16 mt-10">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                Email
-              </h3>
-              <a
-                href="mailto:contacto@crieg.com.mx"
-                className="text-gray-900 hover:text-green-600 transition-colors"
-              >
-                contacto@crieg.com.mx
-              </a>
-            </div>
-
-            {/* Phone */}
-            <div className="sm:col-span-2">
-              <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                Teléfono
-              </h3>
-              <a
-                href="tel:+524775907050"
-                className="text-gray-900 hover:text-green-600 transition-colors"
-              >
-                +52 477 590 70 50
-              </a>
-            </div>
-          </div>
-
-          {/* Action Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Contact Form Card */}
-            <a href="/membership">
-              <div className="bg-[#0B4B2B] text-white p-6 rounded-lg group cursor-pointer hover:bg-gray-800 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-300 mb-2">
-                      ¿Quieres formar parte?
-                    </p>
-                    <h3 className="text-xl font-light">Colegiarse</h3>
-                  </div>
-                  <ArrowRight className="h-6 w-6 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        {/* Right Image Section (modified to full-cover image) */}
-        <div className="relative flex items-center justify-center p-8 lg:p-16">
-          {/* Full-cover background image for the entire right section */}
-          <Image
-            src="/contact-banner.jpg" // <-- your image
-            alt="Equipo médico de radiología"
-            fill
-            className="object-cover"
-            priority
-          />
-
-          {/* Decorative elements (kept, now overlaying the background image) */}
-          <div className="absolute -top-4 -right-4 w-8 h-8 bg-white/20 rounded-full pointer-events-none" />
-          <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-white/10 rounded-full pointer-events-none" />
-          <div className="absolute top-1/2 -left-8 w-6 h-6 bg-white/15 rounded-full pointer-events-none" />
-
-          {/* Mobile Menu Button (unchanged) */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden fixed bottom-6 right-6 z-50 bg-gray-900 text-white p-4 rounded-lg shadow-lg hover:bg-gray-800 transition-colors"
-          >
-            <div className="flex items-center space-x-2">
-              <Menu className="h-5 w-5" />
-              <span className="text-sm font-medium">menu</span>
-            </div>
-          </button>
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-6 mb-12">
+      {/* Nombre */}
+      <div>
+        <label
+          htmlFor="name"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Nombre completo *
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+          placeholder="Ej: Dr. Juan Pérez"
+        />
       </div>
 
-      {/* Mobile Navigation Overlay (unchanged) */}
-      {isMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-gray-900/95 z-40 flex items-center justify-center">
-          <nav className="text-center space-y-8">
-            <a
-              href="/"
-              className="block text-white text-2xl font-light hover:text-gray-300 transition-colors"
-            >
-              Inicio
-            </a>
-            <a
-              href="/about"
-              className="block text-white text-2xl font-light hover:text-gray-300 transition-colors"
-            >
-              Acerca de Nosotros
-            </a>
-            <a
-              href="/contact"
-              className="block text-white text-2xl font-light hover:text-gray-300 transition-colors"
-            >
-              Contacto
-            </a>
-            <a
-              href="/membership"
-              className="block text-white text-2xl font-light hover:text-gray-300 transition-colors"
-            >
-              Colegiarse
-            </a>
-          </nav>
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Email *
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+          placeholder="tu@email.com"
+        />
+      </div>
+
+      {/* Teléfono */}
+      <div>
+        <label
+          htmlFor="phone"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Teléfono (opcional)
+        </label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+          placeholder="+52 477 123 4567"
+        />
+      </div>
+
+      {/* Mensaje */}
+      <div>
+        <label
+          htmlFor="message"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Mensaje *
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
+          required
+          rows={5}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all resize-none"
+          placeholder="Escribe tu mensaje aquí..."
+        />
+      </div>
+
+      {/* Mensaje de éxito */}
+      {status === "success" && (
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-800 text-sm">
+            ✓ Mensaje enviado correctamente. Te responderemos pronto.
+          </p>
         </div>
       )}
-    </div>
+
+      {/* Mensaje de error */}
+      {status === "error" && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm">✗ {errorMessage}</p>
+        </div>
+      )}
+
+      {/* Botón de envío */}
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="w-full bg-[#0B4B2B] text-white py-4 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+      >
+        {status === "loading" ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Enviando...</span>
+          </>
+        ) : (
+          <>
+            <span>Enviar mensaje</span>
+            <Send className="h-5 w-5" />
+          </>
+        )}
+      </button>
+    </form>
   );
 }
