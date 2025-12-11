@@ -69,87 +69,96 @@ export default function ContactForm() {
 
   return (
     <div className="w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6"
+        data-hs-cf-bound="false"
+        data-form-type="other"
+      >
         {/* Nombre */}
         <div>
           <label
-            htmlFor="name"
+            htmlFor="contact_name"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
             Nombre completo *
           </label>
           <input
             type="text"
-            id="name"
+            id="contact_name"
             name="name"
             value={formData.name}
             onChange={handleChange}
             required
             disabled={status === "loading"}
-            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="Ej: Dr. Juan Pérez"
+            autoComplete="off"
           />
         </div>
 
         {/* Email */}
         <div>
           <label
-            htmlFor="email"
+            htmlFor="contact_email"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
             Email *
           </label>
           <input
             type="email"
-            id="email"
+            id="contact_email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             required
             disabled={status === "loading"}
-            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="tu@email.com"
+            autoComplete="off"
           />
         </div>
 
         {/* Teléfono */}
         <div>
           <label
-            htmlFor="phone"
+            htmlFor="contact_phone"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
             Teléfono (opcional)
           </label>
           <input
             type="tel"
-            id="phone"
+            id="contact_phone"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             disabled={status === "loading"}
-            className="w-full bg-white px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="+52 477 123 4567"
+            autoComplete="off"
           />
         </div>
 
         {/* Mensaje */}
         <div>
           <label
-            htmlFor="message"
+            htmlFor="contact_message"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
             Mensaje *
           </label>
           <textarea
-            id="message"
+            id="contact_message"
             name="message"
             value={formData.message}
             onChange={handleChange}
             required
             disabled={status === "loading"}
             rows={5}
-            className="w-full px-4 bg-white py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0B4B2B] focus:border-transparent transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="Escribe tu mensaje aquí..."
+            autoComplete="off"
           />
         </div>
 

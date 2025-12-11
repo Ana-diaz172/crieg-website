@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HubspotTracker from "@/components/HubspotTracker";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,25 +28,26 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            var _hsq = window._hsq = window._hsq || [];
-            _hsq.push(['setPath', window.location.pathname]);
-            _hsq.push(['doNotTrackForms', true]); // 👈 Esto desactiva la captura automática
-          `,
-        }}
-      />
-      <script
-        type="text/javascript"
-        id="hs-script-loader"
-        async
-        defer
-        src="//js.hs-scripts.com/20923872.js"
-      ></script>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script
+          id="hubspot-disable-forms"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window._hsq = window._hsq || [];
+              window._hsq.push(['doNotTrackForms', true]);
+            `,
+          }}
+        />
+
+        <Script
+          id="hs-script-loader"
+          strategy="afterInteractive"
+          src="//js.hs-scripts.com/20923872.js"
+        />
+
         <Navbar />
         <HubspotTracker />
         {children}
