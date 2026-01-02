@@ -6,7 +6,7 @@ export async function loadCertTemplate(req?: NextRequest): Promise<Uint8Array> {
     const isVercel = !!process.env.VERCEL;
 
     if (!isVercel) {
-        const templatePath = path.resolve(process.cwd(), 'public', 'cert-template.pdf');
+        const templatePath = path.resolve(process.cwd(), 'public', 'cert-te mplate.pdf');
         const buf = await fs.readFile(templatePath);
         return new Uint8Array(buf);
     }

@@ -30,7 +30,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact Form */}
-          <ContactForm />
+          <ContactForm /> 
 
           {/* Contact Information */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-16 mt-10">

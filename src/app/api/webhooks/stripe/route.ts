@@ -330,7 +330,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
         fullName,
         pdf,
         invoiceId: ex.invoiceId ?? null,
-        billingUrl: "https://crieg-website.vercel.app/billing",
+        billingUrl: "https://crieg-website.vercel.app/invoice",
       });
 
       console.log(
