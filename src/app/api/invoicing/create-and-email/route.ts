@@ -172,6 +172,7 @@ async function createSimpleAlegraInvoice(params: {
             id: itemId, 
             price: params.amount,
             quantity: 1,
+            productKey: "80141600",
             ...(ALEGRA_DEFAULT_TAX_ID
                 ? { tax: [{ id: Number(ALEGRA_DEFAULT_TAX_ID) }] }
                 : {}),
