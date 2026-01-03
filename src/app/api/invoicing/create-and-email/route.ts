@@ -193,6 +193,9 @@ async function createSimpleAlegraInvoice(params: {
         accountNumber,
         cfdiUse: params.cfdiUse,
         regimeClient: params.taxRegime,
+        stamp: {
+            generateStamp: true 
+        }
     };
 
     const res = await fetch(`${ALEGRA_BASE_URL}/invoices`, {
