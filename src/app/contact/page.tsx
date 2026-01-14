@@ -98,17 +98,6 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 bg-gray-900 text-white p-4 rounded-lg shadow-lg hover:bg-gray-800 transition-colors"
-      >
-        <div className="flex items-center space-x-2">
-          <Menu className="h-5 w-5" />
-          <span className="text-sm font-medium">menu</span>
-        </div>
-      </button>
-
       {/* Mobile Navigation Overlay */}
       {isMenuOpen && (
         <div className="lg:hidden fixed inset-0 bg-gray-900/95 z-40 flex items-center justify-center">

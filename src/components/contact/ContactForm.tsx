@@ -165,7 +165,7 @@ export default function ContactForm() {
         {/* Mensaje de éxito */}
         {status === "success" && (
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-green-800 font-medium text-sm">
                 ¡Mensaje enviado correctamente!
@@ -180,7 +180,7 @@ export default function ContactForm() {
         {/* Mensaje de error */}
         {status === "error" && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
-            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
             <div>
               <p className="text-red-800 font-medium text-sm">
                 Error al enviar el mensaje

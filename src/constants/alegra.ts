@@ -1,11 +1,10 @@
 export const TAX_REGIME_OPTIONS = [
-    { value: "601", label: "601 - General de Ley Personas Morales" },
+   { value: "601", label: "601 - General de Ley Personas Morales" },
     { value: "603", label: "603 - Personas Morales con Fines no Lucrativos" },
     { value: "605", label: "605 - Sueldos y Salarios e Ingresos Asimilados" },
     {
         value: "612",
-        label:
-            "612 - Personas Físicas con Actividades Empresariales y Profesionales",
+        label: "612 - Personas Físicas con Actividades Empresariales y Profesionales",
     },
     { value: "626", label: "626 - Régimen Simplificado de Confianza" },
 ];
@@ -18,12 +17,14 @@ export const CFDI_USE_OPTIONS = [
         value: "D02",
         label: "D02 - Gastos médicos por incapacidad o discapacidad",
     },
-    { value: "P01", label: "P01 - Por definir" },
+    { value: "S01", label: "S01 - Sin efectos fiscales" }, 
 ];
 
 export const PAYMENT_METHOD_OPTIONS = [
-    { value: "credit-card", label: "Tarjeta de crédito" },
-    { value: "debit-card", label: "Tarjeta de débito" },
+    { value: "04", label: "04 - Tarjeta de crédito" },
+    { value: "28", label: "28 - Tarjeta de débito" },
+    // { value: "03", label: "03 - Transferencia electrónica" },
+    // { value: "01", label: "01 - Efectivo" },
 ];
 
 export const MX_STATES = [

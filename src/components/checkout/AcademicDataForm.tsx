@@ -151,12 +151,12 @@ export default function AcademicDataForm({
         </div>
 
         <div className="space-y-2 block text-sm font-medium text-gray-700 mb-5">
-          <Label htmlFor=" validity_period">
+          <Label htmlFor="validity_period">
             Periodo de Vigencia de su última Certificación ante el Consejo
             Mexicano de Radiología e Imagen CMRI *
           </Label>
           <Input
-            id=" validity_period"
+            id="validity_period"
             {...register("validity_period", { required: true })}
           />
           {errors.validity_period && (
