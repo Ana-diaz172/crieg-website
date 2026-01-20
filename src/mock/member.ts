@@ -16,7 +16,7 @@ export const members: Member[] = [
     },
     {
         id: 3,
-        name: "Dra. Ana Celia Castro Porras",
+        name: "Dra. Talia Minerva Rivera Villanueva",
         specialty: "Tesorero",
         image: "/members/member-2.jpg",
     },
