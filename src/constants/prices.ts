@@ -1,7 +1,7 @@
 export const PRICES = {
     CRIEG_MEDICOS: {
-        showPrice: "$2,700",
-        priceAmount: 270000, // cents
+        showPrice: "$100",
+        priceAmount: 10000, // cents
     },
     CRIEG_RESIDENTES: {
         showPrice: "$600",
