@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             stripe_charge_id: "ch_test_123456789",
             stripe_invoice_id: "in_test_123456789",
             stripe_receipt_url: "https://pay.stripe.com/receipts/test_123",
-            stripe_amount: "260000",
+            stripe_amount: "10000",
             stripe_currency: "mxn",
             payment_status: "completed",
             last_payment_date: new Date().toISOString(),
