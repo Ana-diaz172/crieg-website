@@ -6,25 +6,25 @@ export const members: Member[] = [
         id: 1,
         name: "Dr. Luis Ricardo Hinojosa Gutiérrez ",
         specialty: "Presidente",
-        image: "/members/member-1.jpg",
+        image: "/members/member-1.jpeg",
     },
     {
         id: 2,
         name: "Dr. Rafael Paz Gómez",
         specialty: "Secretario",
-        image: "/members/member-3.jpg",
+        image: "/members/member-3.jpeg",
     },
     {
         id: 3,
         name: "Dra. Talia Minerva Rivera Villanueva",
         specialty: "Tesorero",
-        image: "/members/member-2.jpg",
+        image: "/members/member-2.jpeg",
     },
     {
         id: 4,
         name: "Dr. Raúl Javier Ibarra Fombona",
         specialty: "Vicepresidente",
-        image: "/members/member-4.jpg",
+        image: "/members/member-4.jpeg",
     }
 ];
 
