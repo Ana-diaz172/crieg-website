@@ -40,7 +40,6 @@ export const FormSchema = z
           message: "Debes ser mayor de 18 años",
         }
       ),
-    active_member: z.string().min(1, required_error),
 
     university: z.string().min(1, required_error),
     specialty: z.string().min(1, required_error),
