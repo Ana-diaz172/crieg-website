@@ -106,7 +106,6 @@ export function useCheckout() {
                     "phone",
                     "city",
                     "date_of_birth",
-                    "active_member",
                 ]
                 : [];
 

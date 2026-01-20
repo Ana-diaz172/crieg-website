@@ -24,7 +24,6 @@ const DEFAULT_TYPE = "string";
 const DEFAULT_FIELD_TYPE = "text";
 
 const simpleProperties: SimplePropertyConfig[] = [
-    { name: "active_member", description: "Indica si el contacto es miembro activo" },
     { name: "university", description: "Universidad de estudios profesionales" },
     { name: "specialty", description: "Especialidad principal del profesional" },
     { name: "sub_specialty", description: "Subespecialidad del profesional" },

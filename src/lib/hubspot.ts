@@ -27,7 +27,6 @@ const PAYMENT_FIELDS = [
 
 const MEMBERSHIP_CUSTOM_FIELDS = [
     "date_of_birth",
-    "active_member",
     "university",
     "specialty",
     "sub_specialty",
@@ -66,7 +65,6 @@ export interface ContactData {
     phone: string;
     city: string;
     date_of_birth: string;
-    active_member: string;
 
     university: string;
     specialty: string;
@@ -119,7 +117,6 @@ export async function findContactByEmail(email: string) {
             "stripe_currency",
             "last_payment_date",
             "date_of_birth",
-            "active_member",
             "university",
             "specialty",
             "sub_specialty",
@@ -154,7 +151,6 @@ export async function findContactByEmail(email: string) {
         stripe_currency: c.properties?.stripe_currency || "",
         last_payment_date: c.properties?.last_payment_date || "",
         date_of_birth: c.properties?.date_of_birth || "",
-        active_member: c.properties?.active_member || "",
         university: c.properties?.university || "",
         specialty: c.properties?.specialty || "",
         sub_specialty: c.properties?.sub_specialty || "",
@@ -185,7 +181,6 @@ export async function upsertContactByEmail(
             phone: data.phone,
             city: data.city,
             date_of_birth: data.date_of_birth,
-            active_member: data.active_member,
             university: data.university,
             specialty: data.specialty,
             sub_specialty: data.sub_specialty,

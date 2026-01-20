@@ -28,7 +28,6 @@ export interface CheckoutFormData {
     phone: string;
     city: string;
     date_of_birth: string;
-    active_member: string;
 
     university: string;
     specialty: string;

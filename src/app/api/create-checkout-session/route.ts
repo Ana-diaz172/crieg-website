@@ -43,7 +43,6 @@ type IncomingFormData = {
     city: string;
 
     date_of_birth: string;
-    active_member: string;
     university: string;
     specialty: string;
     sub_specialty: string;
@@ -140,7 +139,6 @@ export async function POST(request: NextRequest) {
                 city: formData.city,
 
                 date_of_birth: formData.date_of_birth,
-                active_member: formData.active_member,
                 university: formData.university,
                 specialty: formData.specialty,
                 sub_specialty: formData.sub_specialty,
