@@ -85,18 +85,6 @@ export default function PersonalDataForm({
           )}
         </div>
 
-        <div className="space-y-2 block text-sm font-medium text-gray-700 mb-1">
-          <Label htmlFor="active_member">Constancia de miembro activo *</Label>
-          <Input
-            id="active_member"
-            {...register("active_member", { required: true })}
-          />
-          {errors.active_member && (
-            <p className="text-red-500 text-sm">
-              {errors.active_member.message}
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );
