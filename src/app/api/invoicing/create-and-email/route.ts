@@ -114,7 +114,6 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     address: {
       address: addressLine,
       city: payload.city,
-      country: "Mexico",
       department: payload.state,
       zipCode: payload.zipCode,
     },
