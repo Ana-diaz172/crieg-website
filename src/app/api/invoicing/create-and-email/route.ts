@@ -117,7 +117,6 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
       country: {
         id: 1,
       },
-      department: payload.state,
       zipCode: payload.zipCode,
     },
     cfdi: {
