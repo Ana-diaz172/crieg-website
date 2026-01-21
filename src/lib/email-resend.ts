@@ -27,10 +27,8 @@ export async function sendCertificateEmail(opts: {
 Gracias por formar parte del equipo CRIEG. Te adjuntamos tu certificado en este correo.
 
 Datos para facturar en línea:
-- Invoice ID: ${safeInvoice}
+- ID de Compra: ${safeInvoice}
 - Portal de facturación: ${billingLink}
-
-Si necesitas apoyo, responde a este correo.
 
 Saludos,
 Equipo CRIEG
@@ -42,10 +40,10 @@ Equipo CRIEG
 
   <h3>Datos para facturar en línea</h3>
   <p>
-    <strong>Invoice ID:</strong>
-    <code style="padding:2px 6px;border:1px solid #ddd;border-radius:4px;background:#f7f7f7;">
+    <strong>ID de Compra:</strong>
+    <h3>
       ${safeInvoice}
-    </code>
+    </h3>
   </p>
   <p>
     <a href="${billingLink}" target="_blank" rel="noopener"
@@ -54,7 +52,6 @@ Equipo CRIEG
     </a>
   </p>
 
-  <p>Si necesitas apoyo, responde a este correo.</p>
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
 
@@ -110,8 +107,6 @@ Datos de la factura:
 Puedes consultar o gestionar tu facturación en:
 ${portalUrl}
 
-Si necesitas apoyo o una corrección, responde directamente a este correo.
-
 Saludos,
 Equipo CRIEG
 `;
@@ -135,7 +130,6 @@ Equipo CRIEG
     </a>
   </p>
 
-  <p>Si necesitas apoyo o una corrección, responde directamente a este correo.</p>
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
 
@@ -188,12 +182,11 @@ Gracias por completar tu proceso de membresía FMRI (${membershipId}).
 
 Datos de tu pago:
 - Monto: ${formattedAmount}
-- Invoice ID (Stripe/Alegra): ${safeInvoice}
+- ID de Compra: ${safeInvoice}
 
 Puedes consultar o gestionar tu facturación en:
 ${billingLink}
 
-Si necesitas apoyo, responde a este correo.
 
 Saludos,
 Equipo CRIEG
@@ -206,7 +199,7 @@ Equipo CRIEG
   <h3>Datos de tu pago</h3>
   <ul>
     <li><strong>Monto:</strong> ${formattedAmount}</li>
-    <li><strong>Invoice ID (Stripe/Alegra):</strong> ${safeInvoice}</li>
+    <li><strong>ID de Compra:</strong> ${safeInvoice}</li>
   </ul>
 
   <p>Puedes consultar o gestionar tu facturación en:</p>
@@ -217,7 +210,6 @@ Equipo CRIEG
     </a>
   </p>
 
-  <p>Si necesitas apoyo, responde a este correo.</p>
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
 

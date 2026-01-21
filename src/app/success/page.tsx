@@ -56,6 +56,12 @@ function SuccessContent() {
         >
           Volver al inicio
         </button>
+        <button
+          onClick={() => router.push("/invoice")}
+          className="w-full bg-[#0B4B2B] cursor-pointer hover:bg-green-800 text-white py-3 rounded-lg font-medium"
+        >
+          Factura ya
+        </button>
       </div>
     </div>
   );
