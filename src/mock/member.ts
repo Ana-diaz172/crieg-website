@@ -4,13 +4,13 @@ import { ICheckoutMembership, IInfoCard, IMembershipId, Member, Membership } fro
 export const members: Member[] = [
     {
         id: 1,
-        name: "Dr. Luis Ricardo Hinojosa Gutiérrez ",
+        name: "Dr. Raúl Javier Ibarra Fombona",
         specialty: "Presidente",
         image: "/members/member-1.jpeg",
     },
     {
         id: 2,
-        name: "Dr. Rafael Paz Gómez",
+        name: " Dr. Luis Ricardo Hinojosa Gutiérrez",
         specialty: "Secretario",
         image: "/members/member-3.jpeg",
     },
@@ -22,7 +22,7 @@ export const members: Member[] = [
     },
     {
         id: 4,
-        name: "Dr. Raúl Javier Ibarra Fombona",
+        name: "Dr. Filiberto Vela",
         specialty: "Vicepresidente",
         image: "/members/member-4.jpeg",
     }
