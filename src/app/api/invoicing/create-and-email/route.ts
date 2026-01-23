@@ -125,23 +125,6 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
   };
 
   console.log(createBody)
-  // const createRes = await fetch(`${ALEGRA_BASE_URL}/contacts`, {
-  //   method: "POST",
-  //   headers: {
-  //     Authorization: getAlegraAuthHeader(),
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify(createBody),
-  // });
-
-  // if (!createRes.ok) {
-  //   const errorText = await createRes.text();
-  //   console.error("❌ Error Respuesta Alegra (contact):", errorText);
-  //   throw new Error(`Error creando contacto en Alegra: ${errorText}`);
-  // }
-
-//   const contactData = await createRes.json();
-//   return contactData;
 }
 
 async function createSimpleAlegraInvoice(params: {
