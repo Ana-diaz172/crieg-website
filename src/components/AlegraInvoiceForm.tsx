@@ -327,7 +327,11 @@ export default function AlegraInvoiceForm({
           </CardContent>
 
           <CardFooter className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              className="cursor-pointer mt-4"
+              type="submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Generando factura..." : "Generar factura"}
             </Button>
           </CardFooter>

@@ -99,9 +99,8 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     return contacts[0];
   }
 
-  const addressLine = `${payload.street} ${payload.exteriorNumber}${
-    payload.interiorNumber ? ` Int. ${payload.interiorNumber}` : ""
-  }`;
+  const addressLine = `${payload.street} ${payload.exteriorNumber}${payload.interiorNumber ? ` Int. ${payload.interiorNumber}` : ""
+    }`;
 
   const name = (payload.businessName || payload.fullName).trim();
   const rfc = payload.rfc.trim();
@@ -125,6 +124,23 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
   };
 
   console.log(createBody)
+  // const createRes = await fetch(${ALEGRA_BASE_URL}/contacts, {
+  //   method: "POST",
+  //   headers: {
+  //     Authorization: getAlegraAuthHeader(),
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify(createBody),
+  // });
+
+  // if (!createRes.ok) {
+  //   const errorText = await createRes.text();
+  //   console.error("❌ Error Respuesta Alegra (contact):", errorText);
+  //   throw new Error(Error creando contacto en Alegra: ${errorText});
+  // }
+
+  //   const contactData = await createRes.json();
+  //   return contactData;
 }
 
 async function createSimpleAlegraInvoice(params: {
@@ -137,7 +153,7 @@ async function createSimpleAlegraInvoice(params: {
   cfdiUse: string;
   taxRegime: string;
 }) {
-    
+
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "America/Mexico_City",
   }).format(new Date());
@@ -151,7 +167,7 @@ async function createSimpleAlegraInvoice(params: {
   const itemId = Number(ALEGRA_DEFAULT_ITEM_ID);
   if (!Number.isFinite(itemId)) {
     throw new Error(
-      `Configuración inválida: ALEGRA_DEFAULT_ITEM_ID ('${ALEGRA_DEFAULT_ITEM_ID}') no es un número.`
+    `  Configuración inválida: ALEGRA_DEFAULT_ITEM_ID ('${ALEGRA_DEFAULT_ITEM_ID}') no es un número.`
     );
   }
 
@@ -199,15 +215,14 @@ async function createSimpleAlegraInvoice(params: {
   const data = await res.json();
 
   if (!res.ok) {
-  console.error("❌ ALEGRA STATUS:", res.status);
-  console.error("❌ ALEGRA RESPONSE:", data);
+    console.error("❌ ALEGRA STATUS:", res.status);
+    console.error("❌ ALEGRA RESPONSE:", data);
 
-  throw new Error(
-    `Error creando factura en Alegra (${res.status}): ${
-      (data as any)?.message || JSON.stringify(data)
-    }`
-  );
-}
+    throw new Error(
+      `Error creando factura en Alegra (${res.status}): ${(data as any)?.message || JSON.stringify(data)
+      }`
+    );
+  }
 
 
   return data;
@@ -304,15 +319,16 @@ export async function POST(req: Request) {
     });
 
     const invoiceNumber = invoice.number ?? String(invoice.id);
+    await sendAlegraInvoiceEmail({ invoiceId: invoice.id, emails: [email] });
 
-    await sendInvoiceEmail({
+    /* await sendInvoiceEmail({
       to: email,
       fullName,
       invoiceNumber,
       invoiceId: invoice.id,
       purchaseId,
       billingPortalUrl: process.env.NEXT_PUBLIC_BILLING_PORTAL_URL,
-    });
+    }); */
 
     return NextResponse.json(
       { success: true, invoiceId: invoice.id, invoiceNumber },
@@ -325,4 +341,45 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+async function sendAlegraInvoiceEmail(params: {
+  invoiceId: number | string;
+  emails: string[]; // destinatarios
+}) {
+  const url = `${ALEGRA_BASE_URL}/invoices/${encodeURIComponent(
+    String(params.invoiceId)
+  )}/email`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: getAlegraAuthHeader(),
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      emails: params.emails,
+    }),
+  });
+
+  const raw = await res.text();
+  let data: any = null;
+
+  try {
+    data = raw ? JSON.parse(raw) : null;
+  } catch {
+    data = { raw };
+  }
+
+  if (!res.ok) {
+    console.error("❌ ALEGRA EMAIL STATUS:", res.status);
+    console.error("❌ ALEGRA EMAIL RESPONSE:", data);
+    throw new Error(
+      `Error enviando email de factura en Alegra (${res.status}): ${data?.message || data?.error || data?.raw || JSON.stringify(data)
+      }`
+    );
+  }
+
+  return data;
 }
