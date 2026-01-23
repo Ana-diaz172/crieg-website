@@ -52,7 +52,7 @@ function SuccessContent() {
         </a>
         <button
           onClick={() => router.push("/")}
-          className="w-full bg-[#0B4B2B] cursor-pointer hover:bg-green-800 text-white py-3 rounded-lg font-medium"
+          className="w-full bg-[#0B4B2B] cursor-pointer hover:bg-green-800 text-white py-3 rounded-lg font-medium mb-3"
         >
           Volver al inicio
         </button>
