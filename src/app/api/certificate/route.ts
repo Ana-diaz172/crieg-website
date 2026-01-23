@@ -150,7 +150,7 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     let footerSize = 12;
 
     let footerText = `ID: ${contactId}`;
-    if (sessionId) footerText += `  |  Session: ${sessionId}`;
+    // if (sessionId) footerText += `  |  Session: ${sessionId}`;
 
     const maxWidth = width - rightMargin - 24;
     let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);

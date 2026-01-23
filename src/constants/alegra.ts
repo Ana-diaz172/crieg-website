@@ -7,6 +7,7 @@ export const TAX_REGIME_OPTIONS = [
         label: "612 - Personas Físicas con Actividades Empresariales y Profesionales",
     },
     { value: "626", label: "626 - Régimen Simplificado de Confianza" },
+    { value: "616", label: "616 - Sin obligaciones fiscales" },
 ];
 
 export const CFDI_USE_OPTIONS = [
@@ -20,12 +21,13 @@ export const CFDI_USE_OPTIONS = [
     { value: "S01", label: "S01 - Sin efectos fiscales" }, 
 ];
 
-export const PAYMENT_METHOD_OPTIONS = [
-    { value: "04", label: "04 - Tarjeta de crédito" },
-    { value: "28", label: "28 - Tarjeta de débito" },
-    // { value: "03", label: "03 - Transferencia electrónica" },
-    // { value: "01", label: "01 - Efectivo" },
+    export const PAYMENT_METHOD_OPTIONS = [
+  { value: "credit-card", label: "Tarjeta de crédito" },
+  { value: "debit-card", label: "Tarjeta de débito" },
+//   { value: "bank-transfer", label: "Transferencia bancaria" },
+//   { value: "cash", label: "Efectivo" },
 ];
+
 
 export const MX_STATES = [
     "Aguascalientes",

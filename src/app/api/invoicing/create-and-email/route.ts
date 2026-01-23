@@ -208,6 +208,7 @@ async function createSimpleAlegraInvoice(params: {
     headers: {
       Authorization: getAlegraAuthHeader(),
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify(body),
   });
@@ -215,13 +216,16 @@ async function createSimpleAlegraInvoice(params: {
   const data = await res.json();
 
   if (!res.ok) {
-    console.error(
-      `Error creando factura en Alegra: ${
-        (data as any)?.message || JSON.stringify(data)
-      }`
-    );
-    throw new Error(`Error creando factura en Alegra`);
-  }
+  console.error("❌ ALEGRA STATUS:", res.status);
+  console.error("❌ ALEGRA RESPONSE:", data);
+
+  throw new Error(
+    `Error creando factura en Alegra (${res.status}): ${
+      (data as any)?.message || JSON.stringify(data)
+    }`
+  );
+}
+
 
   return data;
 }

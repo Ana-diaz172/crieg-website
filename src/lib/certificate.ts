@@ -38,6 +38,7 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     }
 
     const pdfDoc = await PDFDocument.load(templateBytes);
+    pdfDoc.setCreationDate(new Date());
     const page = pdfDoc.getPages()[0];
 
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -60,7 +61,15 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
     let footerSize = 10;
 
     let footerText = `${contactId}`;
-    if (sessionId) footerText;
+
+    page.drawText(`GEN ${Date.now()}`, {
+  x: 24,
+  y: 24,
+  size: 8,
+  font: footerFont,
+  color: rgb(0.6, 0.6, 0.6),
+});
+
 
     const maxWidth = width - rightMargin - 24;
     let footerWidth = footerFont.widthOfTextAtSize(footerText, footerSize);
