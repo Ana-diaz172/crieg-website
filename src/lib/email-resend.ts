@@ -20,7 +20,7 @@ export async function sendCertificateEmail(opts: {
   const saludo = `Estimado${fullName.trim().endsWith("a") ? "a" : ""} ${fullName},`;
 
   const safeInvoice = invoiceId || "—";
-  const billingLink = billingUrl || "https://crieg-website.vercel.app/invoice";
+  const billingLink = billingUrl || "https://crieg.com.mx/invoice";
 
   const textBody = `${saludo}
 
