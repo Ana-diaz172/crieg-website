@@ -16,8 +16,8 @@ export const PRICES = {
         priceAmount: 670000, // cents
     },
     FMRI_RESIDENTES: {
-        showPrice: "$1,200",
-        priceAmount: 120000, // cents
+        showPrice: "$1,800",
+        priceAmount: 180000, // cents
     },
 
 };
