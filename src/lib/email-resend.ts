@@ -194,7 +194,7 @@ Equipo CRIEG
 
   const htmlBody = `
   <p>${saludo}</p>
-  <p>Gracias por completar tu proceso de membresía <strong>FMRI</strong> (<code>${membershipId}</code>).</p>
+  <p>Gracias por completar tu proceso de membresía <strong>FMRI</strong>.</p>
 
   <h3>Datos de tu pago</h3>
   <ul>

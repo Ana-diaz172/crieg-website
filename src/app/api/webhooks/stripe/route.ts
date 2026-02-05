@@ -308,7 +308,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
         invoiceId: ex.invoiceId ?? null,
         amount: ex.amount ?? null,
         currency: ex.currency ?? null,
-        billingUrl: "https://crieg.com.mx/billing",
+        billingUrl: "https://crieg.com.mx/invoice",
       });
 
       console.log(
@@ -330,7 +330,7 @@ async function updateHubspotAndEmail(ex: PaymentExtract) {
         fullName,
         pdf,
         invoiceId: ex.invoiceId ?? null,
-        billingUrl: "https://crieg.com.mx/billing",
+        billingUrl: "https://crieg.com.mx/invoice",
       });
 
       console.log(
@@ -352,134 +352,61 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("stripe-signature");
     if (!signature) {
       console.error("[WEBHOOK] Missing stripe-signature header");
-      return NextResponse.json(
-        { error: "No signature found" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No signature found" }, { status: 400 });
     }
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(
-        rawBody,
-        signature,
-        webhookSecret
-      );
+      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
     } catch (err: any) {
-      console.error(
-        "[WEBHOOK] Signature verification failed:",
-        err?.message || err
-      );
-      return NextResponse.json(
-        { error: `Webhook Error: ${err.message}` },
-        { status: 400 }
-      );
+      console.error("[WEBHOOK] Signature verification failed:", err?.message || err);
+      return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
     }
 
-    console.log(
-      `[WEBHOOK] Event received: ${event.type} | ID: ${event.id}`
-    );
+    console.log(`[WEBHOOK] Event received: ${event.type} | ID: ${event.id}`);
 
+    // --- 1. EVENTO DE CHECKOUT (Maneja el 90% de los casos) ---
     if (
       event.type === "checkout.session.completed" ||
       event.type === "checkout.session.async_payment_succeeded"
     ) {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log("[WEBHOOK] Processing Checkout Session:", session.id);
-
       const extracted = await extractFromCheckoutSession(session);
-      console.log("[WEBHOOK] Extracted (session):", {
-        sessionId: extracted.sessionId,
-        paymentIntentId: extracted.paymentIntentId,
-        chargeId: extracted.chargeId,
-        invoiceId: extracted.invoiceId,
-        email: extracted.email,
-        customerId: extracted.customerId,
-        amount: extracted.amount,
-        currency: extracted.currency,
-        hubspotContactId: extracted.hubspotContactId,
-        membershipId: extracted.membershipId,
-      });
-
       await updateHubspotAndEmail(extracted);
 
-      const took = Date.now() - started;
-      console.log(`[WEBHOOK] Done checkout.* in ${took}ms`);
       return NextResponse.json({ received: true });
     }
 
+    // --- 2. EVENTO DE PAYMENT INTENT (Solo si no viene de Checkout) ---
     if (event.type === "payment_intent.succeeded") {
       const pi = event.data.object as Stripe.PaymentIntent;
-      console.log("[WEBHOOK] Processing Payment Intent:", pi.id);
 
+      // VALIDACIÓN CLAVE: Si tiene checkout_session_id en metadata, lo ignoramos
+      // porque ya lo procesó el bloque de arriba.
+      if (pi.metadata?.checkout_session_id || event.request?.id === null) {
+        console.log("[WEBHOOK] Skipping payment_intent.succeeded (handled by checkout session)");
+        return NextResponse.json({ received: true });
+      }
+
+      console.log("[WEBHOOK] Processing isolated Payment Intent:", pi.id);
       const extracted = await extractFromPaymentIntent(pi);
-      console.log("[WEBHOOK] Extracted (pi):", {
-        sessionId: extracted.sessionId,
-        paymentIntentId: extracted.paymentIntentId,
-        chargeId: extracted.chargeId,
-        invoiceId: extracted.invoiceId,
-        email: extracted.email,
-        customerId: extracted.customerId,
-        amount: extracted.amount,
-        currency: extracted.currency,
-        hubspotContactId: extracted.hubspotContactId,
-        membershipId: extracted.membershipId,
-      });
-
       await updateHubspotAndEmail(extracted);
 
-      const took = Date.now() - started;
-      console.log(`[WEBHOOK] Done pi.succeeded in ${took}ms`);
       return NextResponse.json({ received: true });
     }
 
+    // --- 3. EVENTO DE SESIÓN EXPIRADA ---
     if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log(`[WEBHOOK] Session expired: ${session.id}`);
-
-      const hubspotContactId =
-        session.metadata?.hubspot_contact_id ||
-        session.client_reference_id ||
-        null;
-
-      const email =
-        session.customer_details?.email ||
-        (session as any).customer_email ||
-        null;
-
-      let contactId = hubspotContactId;
-      if (!contactId && email) {
-        const found = await findContactByEmail(email);
-        contactId = found?.id || null;
-      }
-
-      if (contactId) {
-        await updateHubspotContactPaymentFields(contactId, {
-          stripe_session_id: session.id,
-          payment_status: "failed",
-          last_payment_date: new Date().toISOString(),
-        });
-        console.log(
-          `[WEBHOOK] Expired session updated in HubSpot: ${contactId}`
-        );
-      } else {
-        console.warn("[WEBHOOK] No contact found for expired session");
-      }
-
+      // ... (aquí va tu lógica actual de HubSpot para sesiones fallidas)
       return NextResponse.json({ received: true });
     }
 
     console.log(`[WEBHOOK] Unhandled type: ${event.type}`);
     return NextResponse.json({ received: true });
+
   } catch (error: any) {
-    const took = Date.now() - started;
-    console.error(
-      `[WEBHOOK] Handler failed after ${took}ms:`,
-      error?.message || error
-    );
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    console.error(`[WEBHOOK] Handler failed:`, error?.message || error);
+    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }

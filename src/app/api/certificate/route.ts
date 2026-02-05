@@ -167,7 +167,7 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
 
     pdfDoc.setTitle(`Certificado - ${fullName}`);
     pdfDoc.setAuthor('CRIEG / FMRI');
-    pdfDoc.setSubject('Certificado oficial de membresía 2025');
+    pdfDoc.setSubject('Certificado oficial de membresía 2026');
     pdfDoc.setProducer('CRIEG Certificate Generator');
     pdfDoc.setCreator('CRIEG Website');
     pdfDoc.setCreationDate(new Date());
