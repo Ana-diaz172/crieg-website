@@ -47,7 +47,7 @@ function SuccessContent() {
           href={`/api/certificate?session_id=${sessionId}`}
           className="gap-3 w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 justify-center items-center rounded-lg font-medium flex mb-3"
         >
-          <p>Descargar Reconocimiento</p>
+          <p>Descargar Certificado</p>
           <Download className="size-5" />
         </a>
         <button

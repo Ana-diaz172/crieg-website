@@ -84,9 +84,9 @@ export async function generateCertificateBuffer(opts: GenerateOptions): Promise<
         x: fx, y: fy, size: footerSize, font: footerFont, color: rgb(0.2, 0.2, 0.2),
     });
 
-    pdfDoc.setTitle(`Reconocimiento - ${fullName}`);
+    pdfDoc.setTitle(`Certificado - ${fullName}`);
     pdfDoc.setAuthor('CRIEG / FMRI');
-    pdfDoc.setSubject('Reconocimiento oficial de membresía 2025');
+    pdfDoc.setSubject('Certificado oficial de membresía 2026');
     pdfDoc.setProducer('CRIEG Certificate Generator');
     pdfDoc.setCreator('CRIEG Website');
     pdfDoc.setCreationDate(new Date());

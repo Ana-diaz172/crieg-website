@@ -16,7 +16,7 @@ export async function sendCertificateEmail(opts: {
   const resend = new Resend(key);
   const { to, fullName, pdf, invoiceId, billingUrl } = opts;
 
-  const filename = `Reconocimiento - ${fullName.replace(/[/\\?%*:|"<>]/g, "")}.pdf`;
+  const filename = `Certificado - ${fullName.replace(/[/\\?%*:|"<>]/g, "")}.pdf`;
   const saludo = `Estimado${fullName.trim().endsWith("a") ? "a" : ""} ${fullName},`;
 
   const safeInvoice = invoiceId || "—";
@@ -58,7 +58,7 @@ Equipo CRIEG
   const { data, error } = await resend.emails.send({
     from,
     to,
-    subject: "Tu reconocimiento de membresía",
+    subject: "Tu certificado de membresía",
     text: textBody,
     html: htmlBody,
     attachments: [{ filename, content: pdf.toString("base64") }],
