@@ -108,6 +108,19 @@ export const memberships: Membership[] = [
       "Acceso a actividades académicas nacionales y beneficios federativos durante todo el año.",
     ],
   },
+  {
+    id: "roms-prueba",
+    title: "ROMS Acency Prueba",
+    description:
+      "Prueba",
+    price: PRICES.ROMS.showPrice,
+    priceSuffixLines: ["/hasta el 15 de marzo", "2026"],
+    priceAmount: PRICES.ROMS.priceAmount,
+    features: [
+      "Inscripción gratuita a los eventos organizados por la Federación Mexicana de Radiología e Imagen (FMRI).",
+      "Acceso a actividades académicas nacionales y beneficios federativos durante todo el año.",
+    ],
+  },
 ];
 
 export const infoCards: IInfoCard[] = [
@@ -192,6 +205,12 @@ export const checkoutMemberships: Record<IMembershipId, ICheckoutMembership> = {
   "fmri-residentes": {
     name: "Residente - Miembro FMRI y CRIEG",
     price: PRICES.FMRI_RESIDENTES.showPrice,
+    description:
+      "Acceso gratuito a eventos FMRI y participación en actividades académicas nacionales como residente.",
+  },
+  "roms-prueba": {
+    name: "ROMS Acency Prueba",
+    price: PRICES.ROMS.showPrice,
     description:
       "Acceso gratuito a eventos FMRI y participación en actividades académicas nacionales como residente.",
   },
