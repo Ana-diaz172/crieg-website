@@ -19,8 +19,5 @@ export const PRICES = {
         showPrice: "$1,200",
         priceAmount: 120000, // cents
     },
-    ROMS: {
-        showPrice: "$100",
-        priceAmount: 10000, // cents
-    }
+
 };

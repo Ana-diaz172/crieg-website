@@ -30,9 +30,7 @@ export type IMembershipId =
     | "crieg-residentes"
     | "fmri"
     | "crieg-fmri"
-    | "fmri-residentes"
-    | "roms-prueba";
-
+    | "fmri-residentes";
 export interface ICheckoutMembership {
     name: string;
     price: string;

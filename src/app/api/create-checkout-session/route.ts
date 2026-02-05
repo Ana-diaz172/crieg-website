@@ -36,12 +36,6 @@ const memberships = {
   "Acceso gratuito a eventos FMRI y participación en actividades académicas nacionales como residente.",
     amount: PRICES.FMRI_RESIDENTES.priceAmount,
   },
-  "roms-prueba": {
-    name: "ROMS Acency Prueba",
-   description:
-  "Prueba",
-    amount: PRICES.ROMS.priceAmount,
-  },
 } as const;
 
 const toStripeMetadata = (obj: Record<string, unknown>) =>
