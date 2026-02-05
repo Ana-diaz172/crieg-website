@@ -1,7 +1,7 @@
 export const PRICES = {
     CRIEG_MEDICOS: {
-        showPrice: "$100",
-        priceAmount: 10000, // cents
+        showPrice: "$2,700",
+        priceAmount: 270000, // cents
     },
     CRIEG_RESIDENTES: {
         showPrice: "$600",
@@ -12,7 +12,11 @@ export const PRICES = {
         priceAmount: 400000, // cents
     },
     CRIEG_FMRI: {
-        showPrice: "$6,600",
-        priceAmount: 660000, // cents
+        showPrice: "$6,700",
+        priceAmount: 670000, // cents
+    },
+    FMRI_RESIDENTES: {
+        showPrice: "$1,200",
+        priceAmount: 120000, // cents
     }
 };
