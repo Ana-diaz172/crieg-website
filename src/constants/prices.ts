@@ -8,12 +8,12 @@ export const PRICES = {
         priceAmount: 60000, // cents
     },
     FMRI: {
-        showPrice: "$4,144",
-        priceAmount: 414400, // cents
+        showPrice: "$4,154",
+        priceAmount: 415400, // cents
     },
     CRIEG_FMRI: {
-        showPrice: "$6,844",
-        priceAmount: 684400, // cents
+        showPrice: "$6,850",
+        priceAmount: 685000, // cents
     },
     FMRI_RESIDENTES: {
         showPrice: "$1,800",

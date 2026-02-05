@@ -21,6 +21,12 @@ export default function MemberShipCards() {
 
           Pagos fuera de la plataforma no serán válidos para membresía ni constancias.`}
         </p>
+        <p className="mt-2 text-gray-600 text-sm sm:text-base">
+          <strong>
+            Para brindarte un proceso de pago seguro y automatizado, el monto
+            incluye costos de operación de la plataforma.
+          </strong>
+        </p>
       </div>
 
       {/* --- Contenedor Flexible para 3 arriba y 2 centradas abajo --- */}
@@ -65,7 +71,7 @@ export default function MemberShipCards() {
                 </div>
               ) : (
                 <div className="mb-6">
-                   <p className="text-5xl font-semibold text-[#0B4B2B]">
+                  <p className="text-5xl font-semibold text-[#0B4B2B]">
                     {m.price}
                   </p>
                   {m.priceSuffix && (
@@ -107,7 +113,7 @@ export default function MemberShipCards() {
             Ver más sobre Miembros
             <ArrowUpRight className="w-4 h-4" />
           </a>
-        </div>      
+        </div>
       </div>
     </div>
   );
