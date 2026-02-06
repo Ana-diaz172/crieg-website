@@ -30,7 +30,8 @@ export default function MemberShipCards() {
       </div>
 
       {/* --- Contenedor Flexible para 3 arriba y 2 centradas abajo --- */}
-      <div className="flex flex-wrap justify-center gap-8 max-w-7xl w-full px-6">
+      {/* <div className="flex flex-wrap justify-center gap-8 max-w-7xl w-full px-6"> */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto px-6">
         {memberships.map((m) => {
           const hasMultiLineSuffix =
             Array.isArray(m.priceSuffixLines) && m.priceSuffixLines.length > 0;

@@ -18,12 +18,12 @@ const memberships = {
   "Cuotas preferenciales en congresos CRIEG, sesiones educativas mensuales y regularización automática de tu membresía.",
   amount: PRICES.CRIEG_RESIDENTES.priceAmount,
   },
-  fmri: {
-    name: "Médico Radiólogo – Miembro FMRI",
-    description:
-  "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
-    amount: PRICES.FMRI.priceAmount,
-  },
+//   fmri: {
+//     name: "Médico Radiólogo – Miembro FMRI",
+//     description:
+//   "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
+//     amount: PRICES.FMRI.priceAmount,
+//   },
   "crieg-fmri": {
     name: "Médico Radiólogo – Miembro CRIEG y FMRI",
     description:

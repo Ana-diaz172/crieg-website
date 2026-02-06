@@ -65,22 +65,22 @@ export const memberships: Membership[] = [
       "Constancia oficial de pertenencia al CRIEG expedida por el Colegio.",
     ],
   },
-  {
-    id: "fmri",
-    title: "Médico Radiólogo – Miembro FMRI",
-    description:
-      "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
-    price: PRICES.FMRI.showPrice,
-    priceSuffixLines: ["/hasta el 25 de marzo", "2026"],
-    priceAmount: PRICES.FMRI.priceAmount,
-    features: [
-      "Cuotas preferenciales en congresos y eventos académicos.",
-      "Inscripción gratuita o con descuento a congresos (según categoría y edad).",
-      "Acceso a eventos clave 2026 como la Semana Internacional de Ultrasonido y el Congreso Nacional.",
-      "Posibilidad de participar y publicar trabajos en la revista JMeXFRI.",
-      "Aval académico y respaldo institucional.",
-    ],
-  },
+//   {
+//     id: "fmri",
+//     title: "Médico Radiólogo – Miembro FMRI",
+//     description:
+//       "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
+//     price: PRICES.FMRI.showPrice,
+//     priceSuffixLines: ["/hasta el 25 de marzo", "2026"],
+//     priceAmount: PRICES.FMRI.priceAmount,
+//     features: [
+//       "Cuotas preferenciales en congresos y eventos académicos.",
+//       "Inscripción gratuita o con descuento a congresos (según categoría y edad).",
+//       "Acceso a eventos clave 2026 como la Semana Internacional de Ultrasonido y el Congreso Nacional.",
+//       "Posibilidad de participar y publicar trabajos en la revista JMeXFRI.",
+//       "Aval académico y respaldo institucional.",
+//     ],
+//   },
   {
     id: "crieg-fmri",
     title: "Médico Radiólogo – Miembro CRIEG y FMRI",
@@ -177,12 +177,12 @@ export const checkoutMemberships: Record<IMembershipId, ICheckoutMembership> = {
     description:
       "Cuotas preferenciales en congresos CRIEG, sesiones educativas mensuales y regularización automática de tu membresía.",
   },
-  fmri: {
-    name: "Médico Radiólogo – Miembro FMRI",
-    price: PRICES.FMRI.showPrice,
-    description:
-      "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
-  },
+//   fmri: {
+//     name: "Médico Radiólogo – Miembro FMRI",
+//     price: PRICES.FMRI.showPrice,
+//     description:
+//       "Beneficios exclusivos en congresos, aval académico y respaldo institucional como miembro de la FMRI.",
+//   },
   "crieg-fmri": {
     name: "Médico Radiólogo – Miembro CRIEG y FMRI",
     price: PRICES.CRIEG_FMRI.showPrice,

@@ -28,7 +28,7 @@ export interface Membership {
 export type IMembershipId =
     | "crieg-medicos"
     | "crieg-residentes"
-    | "fmri"
+    // | "fmri"
     | "crieg-fmri"
     | "fmri-residentes";
 export interface ICheckoutMembership {
