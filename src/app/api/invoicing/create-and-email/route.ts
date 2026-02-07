@@ -77,6 +77,20 @@ async function getStripeInfoFromHubspotByEmail(
   return json.contact as HubspotStripeContact;
 }
 
+// Agregar esta función de mapeo al inicio del archivo, después de las constantes
+function mapSATRegimeToAlegra(satCode: string): string {
+  const regimeMap: Record<string, string> = {
+    "601": "GENERAL_REGIME_OF_MORAL_PEOPLE_LAW",
+    "603": "REGIME_OF_MORAL_PEOPLE_NOT_PROFIT",
+    "605": "SALARIED_REGIME",
+    "612": "BUSINESS_ACTIVITIES_REGIME",
+    "626": "REGIME_OF_TRUST",
+    "616": "SIMPLIFIED_REGIME",
+  };
+  
+  return regimeMap[satCode] || "SIMPLIFIED_REGIME";
+}
+
 async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
   const query = encodeURIComponent(payload.rfc || payload.email);
   const listUrl = `${ALEGRA_BASE_URL}/contacts?query=${query}`;
@@ -99,48 +113,53 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     return contacts[0];
   }
 
-  const addressLine = `${payload.street} ${payload.exteriorNumber}${payload.interiorNumber ? ` Int. ${payload.interiorNumber}` : ""
-    }`;
-
   const name = (payload.businessName || payload.fullName).trim();
   const rfc = payload.rfc.trim();
   const email = payload.email.trim();
 
+  // Mapear el régimen SAT al formato de Alegra
+  const alegraRegime = mapSATRegimeToAlegra(payload.taxRegime);
+
   const createBody = {
     name,
     identification: rfc,
+    thirdType: "NATIONAL",
     email,
+    cfdiUse: payload.cfdiUse,
+    regime: alegraRegime,
+    regimeObject: [alegraRegime],
+    paymentMethod: payload.paymentMethod,
     address: {
-      address: addressLine,
-      city: payload.city,
-      country: "M\u00e9xico",
-      department: payload.state,
+      street: payload.street,
+      exteriorNumber: payload.exteriorNumber,
+      interiorNumber: payload.interiorNumber || "",
+      colony: payload.neighborhood,
+      municipality: payload.city,
+      state: payload.state,
       zipCode: payload.zipCode,
+      country: "MEX",
     },
-    cfdi: {
-      use: payload.cfdiUse,
-      regime: payload.taxRegime,
-    },
+    type: ["client"],
+    statementAttached: "no",
   };
 
-  console.log(createBody)
-  // const createRes = await fetch(${ALEGRA_BASE_URL}/contacts, {
-  //   method: "POST",
-  //   headers: {
-  //     Authorization: getAlegraAuthHeader(),
-  //     "Content-Type": "application/json",
-  //   },
-  //   body: JSON.stringify(createBody),
-  // });
+  const createRes = await fetch(`${ALEGRA_BASE_URL}/contacts`, {
+    method: "POST",
+    headers: {
+      Authorization: getAlegraAuthHeader(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(createBody),
+  });
 
-  // if (!createRes.ok) {
-  //   const errorText = await createRes.text();
-  //   console.error("❌ Error Respuesta Alegra (contact):", errorText);
-  //   throw new Error(Error creando contacto en Alegra: ${errorText});
-  // }
+  if (!createRes.ok) {
+    const errorText = await createRes.text();
+    console.error("❌ Error Respuesta Alegra (contact):", errorText);
+    throw new Error(`Error creando contacto en Alegra: ${errorText}`);
+  }
 
-  //   const contactData = await createRes.json();
-  //   return contactData;
+  const contactData = await createRes.json();
+  return contactData;
 }
 
 async function createSimpleAlegraInvoice(params: {
