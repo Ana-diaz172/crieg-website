@@ -44,12 +44,6 @@ Equipo CRIEG
       ${safeInvoice}
     </h3>
   </p>
-  // <p>
-  //   <a href="${billingLink}" target="_blank" rel="noopener"
-  //      style="display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-  //     Ir al portal de facturación
-  //   </a>
-  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
@@ -120,13 +114,6 @@ Equipo CRIEG
     <li><strong>ID de compra (Stripe):</strong> ${safePurchaseId}</li>
   </ul>
 
-  // <p>Puedes consultar o gestionar tu facturación en:</p>
-  // <p>
-  //   <a href="${portalUrl}" target="_blank" rel="noopener"
-  //      style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-  //     Ir al portal de facturación
-  //   </a>
-  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
@@ -196,14 +183,6 @@ Equipo CRIEG
     <li><strong>Monto:</strong> ${formattedAmount}</li>
     <li><strong>ID de Compra:</strong> ${safeInvoice}</li>
   </ul>
-
-  // <p>Puedes consultar o gestionar tu facturación en:</p>
-  // <p>
-  //   <a href="${billingLink}" target="_blank" rel="noopener"
-  //      style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-  //     Ir al portal de facturación
-  //   </a>
-  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
