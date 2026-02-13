@@ -28,7 +28,6 @@ Gracias por formar parte del equipo CRIEG. Te adjuntamos tu certificado en este 
 
 Datos para facturar en línea:
 - ID de Compra: ${safeInvoice}
-- Portal de facturación: ${billingLink}
 
 Saludos,
 Equipo CRIEG
@@ -45,12 +44,12 @@ Equipo CRIEG
       ${safeInvoice}
     </h3>
   </p>
-  <p>
-    <a href="${billingLink}" target="_blank" rel="noopener"
-       style="display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-      Ir al portal de facturación
-    </a>
-  </p>
+  // <p>
+  //   <a href="${billingLink}" target="_blank" rel="noopener"
+  //      style="display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
+  //     Ir al portal de facturación
+  //   </a>
+  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
@@ -104,7 +103,6 @@ Datos de la factura:
 - ID interno (Alegra): ${invoiceId}
 - ID de compra (Stripe): ${safePurchaseId}
 
-Puedes consultar o gestionar tu facturación en:
 ${portalUrl}
 
 Saludos,
@@ -122,13 +120,13 @@ Equipo CRIEG
     <li><strong>ID de compra (Stripe):</strong> ${safePurchaseId}</li>
   </ul>
 
-  <p>Puedes consultar o gestionar tu facturación en:</p>
-  <p>
-    <a href="${portalUrl}" target="_blank" rel="noopener"
-       style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-      Ir al portal de facturación
-    </a>
-  </p>
+  // <p>Puedes consultar o gestionar tu facturación en:</p>
+  // <p>
+  //   <a href="${portalUrl}" target="_blank" rel="noopener"
+  //      style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
+  //     Ir al portal de facturación
+  //   </a>
+  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
@@ -184,9 +182,6 @@ Datos de tu pago:
 - Monto: ${formattedAmount}
 - ID de Compra: ${safeInvoice}
 
-Puedes consultar o gestionar tu facturación en:
-${billingLink}
-
 
 Saludos,
 Equipo CRIEG
@@ -202,13 +197,13 @@ Equipo CRIEG
     <li><strong>ID de Compra:</strong> ${safeInvoice}</li>
   </ul>
 
-  <p>Puedes consultar o gestionar tu facturación en:</p>
-  <p>
-    <a href="${billingLink}" target="_blank" rel="noopener"
-       style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
-      Ir al portal de facturación
-    </a>
-  </p>
+  // <p>Puedes consultar o gestionar tu facturación en:</p>
+  // <p>
+  //   <a href="${billingLink}" target="_blank" rel="noopener"
+  //      style="display:inline-block;margin-top:4px;padding:10px 16px;border-radius:8px;border:1px solid #0b4b2b;text-decoration:none;">
+  //     Ir al portal de facturación
+  //   </a>
+  // </p>
 
   <p>Saludos,<br/>Equipo CRIEG</p>
 `;
