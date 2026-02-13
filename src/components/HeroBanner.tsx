@@ -44,10 +44,19 @@ export default function HeroBanner() {
                 Colegiarse
                 <ArrowUpRight className="text-white" />
               </Link>
-              <Link
+              {/* <Link
                 className="border border-white px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
                 aria-label="Ir a Colegiarse"
                 href="/invoice"
+              >
+                Facturar
+                <ScrollText className="text-white size-5" />
+              </Link> */}
+              <Link
+                className="border border-white px-6 py-3 rounded-full flex gap-3 cursor-pointer mt-4 items-center text-base sm:text-lg font-medium hover:bg-[#0D5C36] transition"
+                aria-label="Facturar"
+                href="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdZDNvaExJ2iJQnlL6wyohsqYCNhIJEZnSK4j744xuIJAz_Ug/viewform?usp=dialog&pli=1&authuser=0"
+                target="_blank"
               >
                 Facturar
                 <ScrollText className="text-white size-5" />

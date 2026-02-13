@@ -7,32 +7,32 @@ import { Check, Download } from "lucide-react";
 function SuccessContent() {
   const [loading, setLoading] = useState(true);
   const [membershipId, setMembershipId] = useState<string | null>(null);
-  const fetchedRef = useRef(false); 
+  const fetchedRef = useRef(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-  if (!sessionId) {
-    router.push("/");
-    return;
-  }
+    if (!sessionId) {
+      router.push("/");
+      return;
+    }
 
-  // ⛔ evita dobles ejecuciones (StrictMode / Suspense)
-  if (fetchedRef.current) return;
-  fetchedRef.current = true;
+    // ⛔ evita dobles ejecuciones (StrictMode / Suspense)
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
 
-  fetch(`/api/checkout/session-info?session_id=${sessionId}`)
-    .then((res) => res.json())
-    .then((data) => {
-      setMembershipId(data.membershipId ?? null);
-      setLoading(false);
-    })
-    .catch(() => {
-      setLoading(false);
-    });
-}, [sessionId, router]);
+    fetch(`/api/checkout/session-info?session_id=${sessionId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setMembershipId(data.membershipId ?? null);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [sessionId, router]);
 
   if (loading) {
     return (
@@ -45,8 +45,7 @@ function SuccessContent() {
     );
   }
 
-  const isFmri =
-    membershipId === "fmri";
+  const isFmri = membershipId === "fmri";
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -89,8 +88,19 @@ function SuccessContent() {
           Volver al inicio
         </button>
 
-        <button
+        {/* <button
           onClick={() => router.push("/invoice")}
+          className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
+        >
+          Factura ya
+        </button> */}
+        <button
+          onClick={() =>
+            window.open(
+              "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdZDNvaExJ2iJQnlL6wyohsqYCNhIJEZnSK4j744xuIJAz_Ug/viewform?usp=dialog&pli=1&authuser=0",
+              "_blank",
+            )
+          }
           className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
         >
           Factura ya
