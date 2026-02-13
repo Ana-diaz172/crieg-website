@@ -103,7 +103,12 @@ export default function AlegraInvoiceForm({
                     id="rfc"
                     name="rfc"
                     value={formData.rfc}
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        rfc: e.target.value.toUpperCase(),
+                      }))
+                    }
                     className="uppercase"
                     required
                   />

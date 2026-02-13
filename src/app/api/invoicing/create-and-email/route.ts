@@ -10,7 +10,7 @@ const ALEGRA_BASE_URL = "https://api.alegra.com/api/v1";
 
 function getAlegraAuthHeader() {
   const base64 = Buffer.from(`${ALEGRA_EMAIL}:${ALEGRA_API_TOKEN}`).toString(
-    "base64"
+    "base64",
   );
   return `Basic ${base64}`;
 }
@@ -43,7 +43,7 @@ type HubspotStripeContact = {
 };
 
 async function getStripeInfoFromHubspotByEmail(
-  email: string
+  email: string,
 ): Promise<HubspotStripeContact> {
   const base =
     process.env.NEXT_PUBLIC_DOMAIN ||
@@ -51,13 +51,13 @@ async function getStripeInfoFromHubspotByEmail(
 
   if (!base) {
     throw new Error(
-      "No se pudo resolver base URL para llamar a /api/debug/contact"
+      "No se pudo resolver base URL para llamar a /api/debug/contact",
     );
   }
 
   const url = `${base.replace(
     /\/$/,
-    ""
+    "",
   )}/api/debug/contact?email=${encodeURIComponent(email)}`;
 
   const res = await fetch(url, { cache: "no-store" });
@@ -65,7 +65,7 @@ async function getStripeInfoFromHubspotByEmail(
   if (!res.ok) {
     const text = await res.text();
     throw new Error(
-      `Error llamando a /api/debug/contact: ${res.status} - ${text}`
+      `Error llamando a /api/debug/contact: ${res.status} - ${text}`,
     );
   }
 
@@ -87,7 +87,7 @@ function mapSATRegimeToAlegra(satCode: string): string {
     "626": "REGIME_OF_TRUST",
     "616": "SIMPLIFIED_REGIME",
   };
-  
+
   return regimeMap[satCode] || "SIMPLIFIED_REGIME";
 }
 
@@ -109,16 +109,45 @@ async function findOrCreateAlegraContact(payload: InvoiceFormPayload) {
     contacts = await listRes.json();
   }
 
-  if (Array.isArray(contacts) && contacts.length > 0) {
-    return contacts[0];
-  }
-
   const name = (payload.businessName || payload.fullName).trim();
   const rfc = payload.rfc.trim();
   const email = payload.email.trim();
 
   // Mapear el régimen SAT al formato de Alegra
   const alegraRegime = mapSATRegimeToAlegra(payload.taxRegime);
+  
+  if (Array.isArray(contacts) && contacts.length > 0) {
+    const existing = contacts[0];
+    
+
+    // Actualizar datos fiscales para evitar errores SAT
+    await fetch(`${ALEGRA_BASE_URL}/contacts/${existing.id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: getAlegraAuthHeader(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        identification: rfc,
+        regime: alegraRegime,
+        regimeObject: [alegraRegime],
+        cfdiUse: payload.cfdiUse,
+        address: {
+          street: payload.street,
+          exteriorNumber: payload.exteriorNumber,
+          interiorNumber: payload.interiorNumber || "",
+          colony: payload.neighborhood,
+          municipality: payload.city,
+          state: payload.state,
+          zipCode: payload.zipCode,
+          country: "MEX",
+        },
+      }),
+    });
+
+    return existing;
+  }
 
   const createBody = {
     name,
@@ -172,21 +201,20 @@ async function createSimpleAlegraInvoice(params: {
   cfdiUse: string;
   taxRegime: string;
 }) {
-
   const today = new Intl.DateTimeFormat("sv-SE", {
     timeZone: "America/Mexico_City",
   }).format(new Date());
 
   if (!ALEGRA_DEFAULT_ITEM_ID) {
     throw new Error(
-      "Configuración incompleta: falta ALEGRA_DEFAULT_ITEM_ID en las variables de entorno."
+      "Configuración incompleta: falta ALEGRA_DEFAULT_ITEM_ID en las variables de entorno.",
     );
   }
 
   const itemId = Number(ALEGRA_DEFAULT_ITEM_ID);
   if (!Number.isFinite(itemId)) {
     throw new Error(
-    `  Configuración inválida: ALEGRA_DEFAULT_ITEM_ID ('${ALEGRA_DEFAULT_ITEM_ID}') no es un número.`
+      `  Configuración inválida: ALEGRA_DEFAULT_ITEM_ID ('${ALEGRA_DEFAULT_ITEM_ID}') no es un número.`,
     );
   }
 
@@ -237,12 +265,21 @@ async function createSimpleAlegraInvoice(params: {
     console.error("❌ ALEGRA STATUS:", res.status);
     console.error("❌ ALEGRA RESPONSE:", data);
 
-    throw new Error(
-      `Error creando factura en Alegra (${res.status}): ${(data as any)?.message || JSON.stringify(data)
-      }`
-    );
-  }
+    const errorCode = data?.error?.code;
+    const errorMessage =
+      data?.error?.message ||
+      data?.message ||
+      "No se pudo generar la factura en Alegra.";
 
+    // Mensaje más amigable si es error SAT 3051
+    if (errorCode === 3051) {
+      throw new Error(
+        "El nombre no coincide con el RFC registrado ante el SAT. Verifica exactamente como aparece en tu constancia de situación fiscal.",
+      );
+    }
+
+    throw new Error(errorMessage);
+  }
 
   return data;
 }
@@ -252,7 +289,7 @@ export async function POST(req: Request) {
     if (!ALEGRA_EMAIL || !ALEGRA_API_TOKEN) {
       return NextResponse.json(
         { error: "Faltan variables de entorno ALEGRA." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -279,14 +316,14 @@ export async function POST(req: Request) {
     if (!purchaseId || !email || !rfc || !businessName) {
       return NextResponse.json(
         { error: "Faltan datos obligatorios." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!paymentMethod) {
       return NextResponse.json(
         { error: "La forma de pago es obligatoria." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -296,7 +333,7 @@ export async function POST(req: Request) {
     if (!Number.isFinite(stripeAmountCents) || stripeAmountCents <= 0) {
       return NextResponse.json(
         { error: "Monto inválido en HubSpot." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -351,13 +388,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { success: true, invoiceId: invoice.id, invoiceNumber },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error: any) {
     console.error("Alegra invoice error:", error);
     return NextResponse.json(
-      { error: error.message || "Error interno." },
-      { status: 500 }
+      {
+        error:
+          error.message ||
+          "No se pudo generar la factura. Verifica tus datos fiscales.",
+      },
+      { status: 400 },
     );
   }
 }
@@ -367,7 +408,7 @@ async function sendAlegraInvoiceEmail(params: {
   emails: string[]; // destinatarios
 }) {
   const url = `${ALEGRA_BASE_URL}/invoices/${encodeURIComponent(
-    String(params.invoiceId)
+    String(params.invoiceId),
   )}/email`;
 
   const res = await fetch(url, {
@@ -395,8 +436,9 @@ async function sendAlegraInvoiceEmail(params: {
     console.error("❌ ALEGRA EMAIL STATUS:", res.status);
     console.error("❌ ALEGRA EMAIL RESPONSE:", data);
     throw new Error(
-      `Error enviando email de factura en Alegra (${res.status}): ${data?.message || data?.error || data?.raw || JSON.stringify(data)
-      }`
+      `Error enviando email de factura en Alegra (${res.status}): ${
+        data?.message || data?.error || data?.raw || JSON.stringify(data)
+      }`,
     );
   }
 
