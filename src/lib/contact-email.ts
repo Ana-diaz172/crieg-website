@@ -19,7 +19,7 @@ export async function sendContactEmail(opts: {
 
     const safePhone = phone || "No proporcionado";
 
-    const textBody = `Nueva consulta de contacto recibida
+    const textBody = `Nueva consulta recibida
 
 Datos del contacto:
 - Nombre: ${name}
@@ -34,7 +34,7 @@ Este mensaje fue enviado desde el formulario de contacto de CRIEG.
 `;
 
     const htmlBody = `
-  <h2>Nueva consulta de contacto recibida</h2>
+  <h2>Nueva consulta recibida</h2>
   
   <h3>Datos del contacto</h3>
   <ul>
