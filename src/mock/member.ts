@@ -28,7 +28,7 @@ export const members: Member[] = [
   },
   {
     id: 4,
-    name: "Dr. Filiberto Vela",
+    name: "Dr. Filiberto Eduardo Vela López",
     specialty: "Vicepresidente",
     image: "/members/member-4.jpeg",
   },

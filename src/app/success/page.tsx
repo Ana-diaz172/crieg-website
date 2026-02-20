@@ -88,13 +88,13 @@ function SuccessContent() {
           Volver al inicio
         </button>
 
-        {/* <button
+        <button
           onClick={() => router.push("/invoice")}
           className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
         >
           Factura ya
-        </button> */}
-        <button
+        </button>
+        {/* <button
           onClick={() =>
             window.open(
               "https://docs.google.com/forms/u/0/d/e/1FAIpQLSdZDNvaExJ2iJQnlL6wyohsqYCNhIJEZnSK4j744xuIJAz_Ug/viewform?usp=dialog&pli=1&authuser=0",
@@ -104,7 +104,7 @@ function SuccessContent() {
           className="w-full bg-[#0B4B2B] hover:bg-green-800 text-white py-3 rounded-lg font-medium"
         >
           Factura ya
-        </button>
+        </button> */}
       </div>
     </div>
   );
