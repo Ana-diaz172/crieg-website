@@ -58,7 +58,7 @@ export default function HeroBanner() {
                 href="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdZDNvaExJ2iJQnlL6wyohsqYCNhIJEZnSK4j744xuIJAz_Ug/viewform?usp=dialog&pli=1&authuser=0"
                 target="_blank"
               >
-                Facturar
+                 r
                 <ScrollText className="text-white size-5" />
               </Link> */}
             </div>
