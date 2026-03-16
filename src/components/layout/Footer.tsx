@@ -114,7 +114,7 @@ export default function Footer() {
 
               {/* Legal Links */}
               <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500">
-                <span>© 2025 CRIEG</span>
+                <span>© 2026 CRIEG</span>
                 {legalLinks.map((link, index) => (
                   <a
                     key={index}

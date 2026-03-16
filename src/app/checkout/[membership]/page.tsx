@@ -55,7 +55,7 @@ export default function CheckoutPage() {
           <div className="px-6 sm:px-12 lg:px-16 xl:px-24 py-12">
             <div className="mb-8 mt-24">
               <h1 className="text-3xl font-light leading-tight text-gray-900 mb-6">
-                Formato de recolección de datos Membresía CRIEG Y FMRI 2025
+                Formato de recolección de datos Membresía CRIEG Y FMRI 2026
               </h1>
 
               {/* Membership Info Card */}
