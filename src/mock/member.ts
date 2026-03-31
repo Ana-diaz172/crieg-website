@@ -41,7 +41,7 @@ export const memberships: Membership[] = [
     description:
       "Cuotas preferenciales en congresos, sesiones educativas mensuales, regularización automática 2026 y constancia oficial de pertenencia al CRIEG.",
     price: PRICES.CRIEG_MEDICOS.showPrice,
-    priceSuffixLines: ["/hasta el 26 de marzo", "2026"],
+    priceSuffixLines: ["/hasta el 31 de diciembre", "2026"],
     priceAmount: PRICES.CRIEG_MEDICOS.priceAmount,
     features: [
       "Cuotas preferenciales para el XXI Congreso Internacional Cervantino de Imágenes Médicas y el 2° Congreso Virtual de Imágenes Médicas.",
@@ -56,7 +56,7 @@ export const memberships: Membership[] = [
     description:
       "Cuotas preferenciales en congresos CRIEG, sesiones educativas mensuales y regularización automática de tu membresía.",
     price: PRICES.CRIEG_RESIDENTES.showPrice,
-    priceSuffixLines: ["/hasta el 26 de marzo", "2026"],
+    priceSuffixLines: ["/hasta el 31 de diciembre", "2026"],
     priceAmount: PRICES.CRIEG_RESIDENTES.priceAmount,
     features: [
       "Cuotas preferenciales para el XXI Congreso Internacional Cervantino de Imágenes Médicas y el 2° Congreso Virtual de Imágenes Médicas.",
@@ -87,7 +87,7 @@ export const memberships: Membership[] = [
     description:
       "Pertenencia activa a CRIEG y FMRI con acceso académico, cuotas preferenciales y reconocimiento gremial.",
     price: PRICES.CRIEG_FMRI.showPrice,
-    priceSuffixLines: ["/hasta el 26 de marzo", "2026"],
+    priceSuffixLines: ["/hasta el 31 de diciembre", "2026"],
     priceAmount: PRICES.CRIEG_FMRI.priceAmount,
     features: [
       "Pertenencia activa al Colegio de Radiología e Imagen del Estado de Guanajuato y a la Federación Mexicana de Radiología e Imagen (FMRI).",
@@ -101,7 +101,7 @@ export const memberships: Membership[] = [
     description:
       "Acceso gratuito a eventos FMRI y participación en actividades académicas nacionales como residente.",
     price: PRICES.FMRI_RESIDENTES.showPrice,
-    priceSuffixLines: ["/hasta el 26 de marzo", "2026"],
+    priceSuffixLines: ["/hasta el 31 de diciembre", "2026"],
     priceAmount: PRICES.FMRI_RESIDENTES.priceAmount,
     features: [
       "Inscripción gratuita a los eventos organizados por la Federación Mexicana de Radiología e Imagen (FMRI).",
