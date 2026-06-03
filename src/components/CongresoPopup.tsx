@@ -9,9 +9,8 @@ export default function CongresoPopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const congresoActivo = new Date() >= new Date("2026-06-02T15:00:00");
     const yaVisto = sessionStorage.getItem("congreso-popup");
-    if (congresoActivo && !yaVisto) {
+    if (!yaVisto) {
       setTimeout(() => setVisible(true), 1000);
     }
   }, []);
