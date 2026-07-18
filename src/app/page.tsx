@@ -2,13 +2,11 @@ import AboutValues from "@/components/AboutValues";
 import HeroBanner from "@/components/HeroBanner";
 import MemberGridWithSheets from "@/components/MemberGridWithSheets";
 import MemberShipCards from "@/components/MemberShipCards";
-import CongresoPopup from "@/components/CongresoPopup";
 import { members } from "@/mock/member";
 
 export default function Home() {
   return (
     <div>
-      <CongresoPopup /> 
 
       {/* Banner */}
       <HeroBanner />

@@ -5,10 +5,7 @@ import { ArrowUpRight, ScrollText } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-const slides = [
-  { src: "/banner.webp", alt: "Banner CRIEG" },
-  { src: "/banner-congreso.webp", alt: "Congreso CRIEG 2026" },
-];
+const slides = [{ src: "/banner.webp", alt: "Banner CRIEG" }];
 
 export default function HeroBanner() {
   const [current, setCurrent] = useState(0);
@@ -42,17 +39,19 @@ export default function HeroBanner() {
       <div className="absolute inset-x-0 top-0 bg-linear-to-b from-black/70 to-transparent h-[110px] sm:h-[130px] z-10" />
       <div className="absolute inset-0 bg-linear-to-t from-black/70 to-transparent z-10" />
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
-              i === current ? "bg-white scale-125" : "bg-white/40"
-            }`}
-          />
-        ))}
-      </div>
+      {slides.length > 1 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrent(i)}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                i === current ? "bg-white scale-125" : "bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
 
       {current === 1 && (
         <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20">
